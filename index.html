@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#080b15">
-  <meta name="description" content="Seven interpretations of one galaxy strategy game, each built by a different model.">
+  <meta name="description" content="Ten interpretations of one galaxy strategy game, each built by a different model.">
   <title>Mini Stellaris — The Gallery</title>
   <style>
     :root { color-scheme: dark; font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #080b15; color: #eeeaf1; }
@@ -59,7 +59,7 @@
     .game-table .model-cell { font-weight: 650; }
     .game-table .muted { color: #888c9a; }
     .table-preview { display: block; width: 76px; aspect-ratio: 16 / 10; padding: 0; overflow: hidden; border: 1px solid #ffffff30; border-radius: 4px; background: #080b15; cursor: zoom-in; }
-    .table-preview img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+    .table-preview img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: top center; }
     .table-preview:hover { border-color: #dfb783; }
     .game-table .table-launch { color: #ebc391; text-decoration: none; font-weight: 650; white-space: nowrap; }
     .game-table .table-launch:hover { color: #fff0d7; }
@@ -70,7 +70,7 @@
     .card-num { color: #d4ae81; font-size: 10px; }
     .card-kind { color: #777d8d; font-size: 10px; text-align: right; }
     .preview { display: block; width: calc(100% - 20px); margin: 0 10px; padding: 0; background: #080b15; border: 1px solid #ffffff24; border-radius: 7px; overflow: hidden; cursor: zoom-in; position: relative; aspect-ratio: 16 / 10; }
-    .preview img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: top center; transition: transform .35s, filter .35s; }
+    .preview img { width: 100%; height: 100%; display: block; object-fit: contain; object-position: top center; transition: transform .35s, filter .35s; }
     .preview:hover img, .preview:focus-visible img { transform: scale(1.035); filter: brightness(.72); }
     .zoom-label { position: absolute; inset: auto 12px 12px auto; padding: 8px 10px; border: 1px solid #ffffff4a; border-radius: 5px; background: #090b15d9; color: white; font-size: 11px; font-weight: 650; letter-spacing: .04em; opacity: 0; transform: translateY(5px); transition: opacity .2s, transform .2s; }
     .preview:hover .zoom-label, .preview:focus-visible .zoom-label { opacity: 1; transform: none; }
@@ -122,24 +122,24 @@
   <div class="shell">
     <header class="masthead">
       <a class="brand" href="./index.html"><span class="brand-mark" aria-hidden="true">✧</span> Mini Stellaris</a>
-      <span class="mast-note">A study in seven interpretations</span>
+      <span class="mast-note">A study in ten interpretations</span>
     </header>
     <main>
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
           <div class="eyebrow">The model gallery</div>
-          <h1 id="hero-title">One game.<br><em>Seven galaxies.</em></h1>
-          <p>The same strategy game, imagined and built seven different ways. Explore each command deck, then step into the galaxy that catches your eye.</p>
+          <h1 id="hero-title">One game.<br><em>Ten galaxies.</em></h1>
+          <p>The same strategy game, imagined and built ten different ways. Explore each command deck, then step into the galaxy that catches your eye.</p>
         </div>
         <div class="orbit" aria-hidden="true"><span class="orbit-core"></span><span class="orbit-star one"></span><span class="orbit-star two"></span></div>
       </section>
       <section aria-labelledby="gallery-title">
-        <div class="gallery-head"><h2 id="gallery-title">Explore the versions</h2><div class="gallery-controls"><span class="count">07 / 07 models</span><div class="view-switch" role="group" aria-label="Gallery view"><button type="button" id="gridView" aria-pressed="true" aria-controls="gallery">Cards</button><button type="button" id="tableView" aria-pressed="false" aria-controls="tableViewPanel">Table</button></div></div></div>
+        <div class="gallery-head"><h2 id="gallery-title">Explore the versions</h2><div class="gallery-controls"><span class="count">10 / 10 models</span><div class="view-switch" role="group" aria-label="Gallery view"><button type="button" id="gridView" aria-pressed="true" aria-controls="gallery">Cards</button><button type="button" id="tableView" aria-pressed="false" aria-controls="tableViewPanel">Table</button></div></div></div>
         <details class="rubric" id="visual-rubric">
           <summary>How visual scores work · Subjective screenshot review / 100</summary>
           <p>Each full gameplay screenshot is judged on five criteria, each rated from 0 to 10: art direction (palette, identity, atmosphere), layout (balance, hierarchy, spacing), readability (text size and contrast), world rendering (planet detail, depth, map treatment), and polish (consistent typography, borders, icons, and finish).</p>
           <p><strong>Score = round(3 × art direction + 2.5 × layout + 2 × readability + 1.5 × world rendering + 1 × polish).</strong> Scale: 0 = absent or unusable, 5 = functional but visually basic, 7 = good with visible weaknesses, 9 = excellent, 10 = exceptional.</p>
-          <p>Based on the seven supplied 1440 × 900 gameplay screenshots, reviewed on 25 October 2026. Ratings describe the captured view, including visible clipping; animation, other screen sizes, gameplay quality, model cost, and token usage are not assessed. Expand a card’s breakdown for the reasoning.</p>
+          <p>Based on ten desktop gameplay screenshots, reviewed on 25 October 2026. Original captures are 1440 × 900; newer captures use the available desktop viewport, with full-page captures for Sol and reworked Astra. These subjective ratings are not a controlled viewport benchmark. Ratings describe the captured view, including visible clipping; animation, other screen sizes, gameplay quality, model cost, and token usage are not assessed. Expand a card’s breakdown for the reasoning.</p>
         </details>
         <div id="tableViewPanel" hidden>
           <p class="table-note" id="rankNote">Rank uses visual score − 6 × log₂(1 + price in USD). Games without a reported price are unranked. Select a heading to sort.</p>
@@ -159,18 +159,18 @@
           </div>
         </div>
         <div class="grid" id="gallery">
-          <article class="card" data-name="Astra" data-image="gallery-assets/astra.jpg" data-link="Astra/index.html">
-            <div class="card-head"><div><span class="card-num">01 / 07</span><h3>Astra</h3></div><span class="card-kind">Version 01</span></div>
-            <button class="preview" type="button" aria-label="Expand Astra game screenshot"><img src="gallery-assets/astra.jpg" alt="Astra game in progress" fetchpriority="high"><span class="zoom-label">Expand ↗</span></button>
+          <article class="card" data-name="GPT-6 Astra" data-image="gallery-assets/astra-reworked.png" data-link="Astra/index.html">
+            <div class="card-head"><div><span class="card-num">01 / 10</span><h3>GPT-6 Astra</h3></div><span class="card-kind">Version 01</span></div>
+            <button class="preview" type="button" aria-label="Expand GPT-6 Astra game screenshot"><img src="gallery-assets/astra-reworked.png" alt="GPT-6 Astra game in progress" fetchpriority="high"><span class="zoom-label">Expand ↗</span></button>
             <div class="visual-review">
-              <div class="visual-score"><span class="metric-label">Visual score</span><strong>85<small> / 100</small></strong></div>
-              <details><summary>Score breakdown</summary><dl><dt>Art direction · 30%</dt><dd>9/10</dd><dt>Layout · 25%</dt><dd>8/10</dd><dt>Readability · 20%</dt><dd>7.5/10</dd><dt>World rendering · 15%</dt><dd>9/10</dd><dt>Polish · 10%</dt><dd>9/10</dd></dl><p>Distinctive cream-and-sage art direction, elegant typography, and softly textured planets give this the strongest visual identity. Spacious panels feel refined, but small muted labels and the cropped bottom row weaken the captured view.</p></details>
+              <div class="visual-score"><span class="metric-label">Visual score</span><strong>89<small> / 100</small></strong></div>
+              <details><summary>Score breakdown</summary><dl><dt>Art direction · 30%</dt><dd>9.5/10</dd><dt>Layout · 25%</dt><dd>9/10</dd><dt>Readability · 20%</dt><dd>7.5/10</dd><dt>World rendering · 15%</dt><dd>9.5/10</dd><dt>Polish · 10%</dt><dd>9/10</dd></dl><p>Reassessed from a fresh capture of the reworked Aster game. Expressive serif typography, restrained cream-and-sage colors, and a compact empire header give the interface a cohesive identity. Richly textured planets, delicate orbital details, and the illustrated world inspector improve depth and finish. Small, low-contrast map labels and controls below the initial viewport remain the main weaknesses.</p></details>
             </div>
-            <div class="run-data"><span class="data-label">Model</span><span class="model-name">Astra</span><div class="no-data">Usage figures not supplied</div></div>
+            <div class="run-data"><span class="data-label">Model</span><span class="model-name">GPT-6 Astra</span><div class="metrics"><div class="metric"><span class="metric-label">Tokens</span><strong class="metric-value">99k</strong></div><div class="metric cost"><span class="metric-label">Cost</span><strong class="metric-value">$6.48</strong></div></div></div>
             <div class="card-foot"><span>In-game preview</span><a class="launch" href="Astra/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
           </article>
           <article class="card" data-name="DeepSeek" data-image="gallery-assets/deepseek.jpg" data-link="DeepSeek/index.html">
-            <div class="card-head"><div><span class="card-num">02 / 07</span><h3>DeepSeek</h3></div><span class="card-kind">Version 02</span></div>
+            <div class="card-head"><div><span class="card-num">02 / 10</span><h3>DeepSeek</h3></div><span class="card-kind">Version 02</span></div>
             <button class="preview" type="button" aria-label="Expand DeepSeek game screenshot"><img src="gallery-assets/deepseek.jpg" alt="DeepSeek game in progress"><span class="zoom-label">Expand ↗</span></button>
             <div class="visual-review">
               <div class="visual-score"><span class="metric-label">Visual score</span><strong>83<small> / 100</small></strong></div>
@@ -180,7 +180,7 @@
             <div class="card-foot"><span>In-game preview</span><a class="launch" href="DeepSeek/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
           </article>
           <article class="card" data-name="GLM" data-image="gallery-assets/glm.jpg" data-link="GLM/index.html">
-            <div class="card-head"><div><span class="card-num">03 / 07</span><h3>GLM</h3></div><span class="card-kind">Version 03</span></div>
+            <div class="card-head"><div><span class="card-num">03 / 10</span><h3>GLM</h3></div><span class="card-kind">Version 03</span></div>
             <button class="preview" type="button" aria-label="Expand GLM game screenshot"><img src="gallery-assets/glm.jpg" alt="GLM game in progress"><span class="zoom-label">Expand ↗</span></button>
             <div class="visual-review">
               <div class="visual-score"><span class="metric-label">Visual score</span><strong>65<small> / 100</small></strong></div>
@@ -190,7 +190,7 @@
             <div class="card-foot"><span>In-game preview</span><a class="launch" href="GLM/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
           </article>
           <article class="card" data-name="Kimi K3" data-image="gallery-assets/kimi-k3.jpg" data-link="Kimi%20K3/index.html">
-            <div class="card-head"><div><span class="card-num">04 / 07</span><h3>Kimi K3</h3></div><span class="card-kind">Version 04</span></div>
+            <div class="card-head"><div><span class="card-num">04 / 10</span><h3>Kimi K3</h3></div><span class="card-kind">Version 04</span></div>
             <button class="preview" type="button" aria-label="Expand Kimi K3 game screenshot"><img src="gallery-assets/kimi-k3.jpg" alt="Kimi K3 game in progress"><span class="zoom-label">Expand ↗</span></button>
             <div class="visual-review">
               <div class="visual-score"><span class="metric-label">Visual score</span><strong>82<small> / 100</small></strong></div>
@@ -200,7 +200,7 @@
             <div class="card-foot"><span>In-game preview</span><a class="launch" href="Kimi%20K3/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
           </article>
           <article class="card" data-name="Minimax" data-image="gallery-assets/minimax.jpg?v=2" data-link="Minimax/index.html">
-            <div class="card-head"><div><span class="card-num">05 / 07</span><h3>Minimax</h3></div><span class="card-kind">Version 05</span></div>
+            <div class="card-head"><div><span class="card-num">05 / 10</span><h3>Minimax</h3></div><span class="card-kind">Version 05</span></div>
             <button class="preview" type="button" aria-label="Expand Minimax game screenshot"><img src="gallery-assets/minimax.jpg?v=2" alt="Minimax game in progress"><span class="zoom-label">Expand ↗</span></button>
             <div class="visual-review">
               <div class="visual-score"><span class="metric-label">Visual score</span><strong>76<small> / 100</small></strong></div>
@@ -210,7 +210,7 @@
             <div class="card-foot"><span>In-game preview</span><a class="launch" href="Minimax/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
           </article>
           <article class="card" data-name="Qwen" data-image="gallery-assets/qwen.jpg" data-link="Qwen/index.html">
-            <div class="card-head"><div><span class="card-num">06 / 07</span><h3>Qwen</h3></div><span class="card-kind">Version 06</span></div>
+            <div class="card-head"><div><span class="card-num">06 / 10</span><h3>Qwen</h3></div><span class="card-kind">Version 06</span></div>
             <button class="preview" type="button" aria-label="Expand Qwen game screenshot"><img src="gallery-assets/qwen.jpg" alt="Qwen game in progress"><span class="zoom-label">Expand ↗</span></button>
             <div class="visual-review">
               <div class="visual-score"><span class="metric-label">Visual score</span><strong>74<small> / 100</small></strong></div>
@@ -220,7 +220,7 @@
             <div class="card-foot"><span>In-game preview</span><a class="launch" href="Qwen/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
           </article>
           <article class="card" data-name="Xiaomi-Mimo" data-image="gallery-assets/xiaomi-mimo.jpg" data-link="Xiaomi-Mimo/index.html">
-            <div class="card-head"><div><span class="card-num">07 / 07</span><h3>Xiaomi-Mimo</h3></div><span class="card-kind">Version 07</span></div>
+            <div class="card-head"><div><span class="card-num">07 / 10</span><h3>Xiaomi-Mimo</h3></div><span class="card-kind">Version 07</span></div>
             <button class="preview" type="button" aria-label="Expand Xiaomi-Mimo game screenshot"><img src="gallery-assets/xiaomi-mimo.jpg" alt="Xiaomi-Mimo game in progress"><span class="zoom-label">Expand ↗</span></button>
             <div class="visual-review">
               <div class="visual-score"><span class="metric-label">Visual score</span><strong>67<small> / 100</small></strong></div>
@@ -229,10 +229,40 @@
             <div class="run-data"><span class="data-label">Model</span><span class="model-name">Xiaomi MiMo-V2.6 Pro</span><div class="metrics"><div class="metric"><span class="metric-label">Tokens</span><strong class="metric-value">222k</strong></div><div class="metric cost"><span class="metric-label">Cost</span><strong class="metric-value">$0.31</strong></div></div><p class="data-note">Many additional prompts were needed.</p></div>
             <div class="card-foot"><span>In-game preview</span><a class="launch" href="Xiaomi-Mimo/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
           </article>
+          <article class="card" data-name="Opus 5.5" data-image="gallery-assets/opus-5-5.png" data-link="Opus%205.5/index.html">
+            <div class="card-head"><div><span class="card-num">08 / 10</span><h3>Opus 5.5</h3></div><span class="card-kind">Version 08</span></div>
+            <button class="preview" type="button" aria-label="Expand Opus 5.5 game screenshot"><img src="gallery-assets/opus-5-5.png" alt="Opus 5.5 game in progress" loading="lazy"><span class="zoom-label">Expand ↗</span></button>
+            <div class="visual-review">
+              <div class="visual-score"><span class="metric-label">Visual score</span><strong>82<small> / 100</small></strong></div>
+              <details><summary>Score breakdown</summary><dl><dt>Art direction · 30%</dt><dd>8.5/10</dd><dt>Layout · 25%</dt><dd>8/10</dd><dt>Readability · 20%</dt><dd>7.5/10</dd><dt>World rendering · 15%</dt><dd>9/10</dd><dt>Polish · 10%</dt><dd>8/10</dd></dl><p>Varied planet surfaces, luminous relays, and a rich purple palette create a vivid galaxy. Bold empire summaries and consistent icons feel finished, though tiny map labels and a crowded, scrolling order sidebar weaken the composition.</p></details>
+            </div>
+            <div class="run-data"><span class="data-label">Model</span><span class="model-name">Opus 5.5</span><div class="metrics"><div class="metric"><span class="metric-label">Tokens</span><strong class="metric-value">146k</strong></div><div class="metric cost"><span class="metric-label">Cost</span><strong class="metric-value">$3.13</strong></div></div></div>
+            <div class="card-foot"><span>In-game preview</span><a class="launch" href="Opus%205.5/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
+          </article>
+          <article class="card" data-name="Sonnet 5.5" data-image="gallery-assets/sonnet-5-5.png" data-link="Sonnet%205.5/index.html">
+            <div class="card-head"><div><span class="card-num">09 / 10</span><h3>Sonnet 5.5</h3></div><span class="card-kind">Version 09</span></div>
+            <button class="preview" type="button" aria-label="Expand Sonnet 5.5 game screenshot"><img src="gallery-assets/sonnet-5-5.png" alt="Sonnet 5.5 game in progress" loading="lazy"><span class="zoom-label">Expand ↗</span></button>
+            <div class="visual-review">
+              <div class="visual-score"><span class="metric-label">Visual score</span><strong>73<small> / 100</small></strong></div>
+              <details><summary>Score breakdown</summary><dl><dt>Art direction · 30%</dt><dd>7/10</dd><dt>Layout · 25%</dt><dd>7.5/10</dd><dt>Readability · 20%</dt><dd>8/10</dd><dt>World rendering · 15%</dt><dd>7/10</dd><dt>Polish · 10%</dt><dd>7/10</dd></dl><p>Bright planet colors, large numbered markers, and clear attribute bars make the map easy to scan. Repeated smooth spheres and conventional panels feel less distinctive; oversized timeline markers and controls near the bottom edge reduce polish.</p></details>
+            </div>
+            <div class="run-data"><span class="data-label">Model</span><span class="model-name">Sonnet 5.5</span><div class="metrics"><div class="metric"><span class="metric-label">Tokens</span><strong class="metric-value">73k</strong></div><div class="metric cost"><span class="metric-label">Cost</span><strong class="metric-value">$0.83</strong></div></div></div>
+            <div class="card-foot"><span>In-game preview</span><a class="launch" href="Sonnet%205.5/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
+          </article>
+          <article class="card" data-name="GPT-6.1 Sol" data-image="gallery-assets/gpt-6-1-sol.png" data-link="GPT%206.1%20Sol/index.html">
+            <div class="card-head"><div><span class="card-num">10 / 10</span><h3>GPT-6.1 Sol</h3></div><span class="card-kind">Version 10</span></div>
+            <button class="preview" type="button" aria-label="Expand GPT-6.1 Sol game screenshot"><img src="gallery-assets/gpt-6-1-sol.png" alt="GPT-6.1 Sol game in progress" loading="lazy"><span class="zoom-label">Expand ↗</span></button>
+            <div class="visual-review">
+              <div class="visual-score"><span class="metric-label">Visual score</span><strong>88<small> / 100</small></strong></div>
+              <details><summary>Score breakdown</summary><dl><dt>Art direction · 30%</dt><dd>9/10</dd><dt>Layout · 25%</dt><dd>8.5/10</dd><dt>Readability · 20%</dt><dd>8/10</dd><dt>World rendering · 15%</dt><dd>9.5/10</dd><dt>Polish · 10%</dt><dd>9/10</dd></dl><p>A cohesive cream-and-sage interface pairs elegant type with richly textured, individually shaded planets. Balanced panels and restrained icons feel refined. Small secondary labels and a tall page that puts some controls below the initial viewport are the main compromises.</p></details>
+            </div>
+            <div class="run-data"><span class="data-label">Model</span><span class="model-name">GPT-6.1 Sol</span><div class="metrics"><div class="metric"><span class="metric-label">Tokens</span><strong class="metric-value">103k</strong></div><div class="metric cost"><span class="metric-label">Cost</span><strong class="metric-value">$1.12</strong></div></div></div>
+            <div class="card-foot"><span>In-game preview</span><a class="launch" href="GPT%206.1%20Sol/index.html" target="_blank" rel="noopener">Launch game <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg></a></div>
+          </article>
         </div>
       </section>
     </main>
-    <footer class="footer"><span>Mini Stellaris / Model gallery</span><span>Seven versions · One shared brief</span></footer>
+    <footer class="footer"><span>Mini Stellaris / Model gallery</span><span>Ten versions · One shared brief</span></footer>
   </div>
   <dialog id="lightbox" aria-label="Expanded game screenshot">
     <div class="lightbox-bar"><span class="lightbox-title" id="lightboxTitle"></span><div class="lightbox-actions"><button type="button" id="previous" aria-label="Previous screenshot">←</button><button type="button" id="next" aria-label="Next screenshot">→</button><a id="lightboxLaunch" href="#" target="_blank" rel="noopener" aria-label="Launch this game">↗</a><button type="button" id="close" aria-label="Close screenshot">×</button></div></div>
