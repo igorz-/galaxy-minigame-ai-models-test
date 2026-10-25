@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Void Empires — Blitz</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" width="30" height="30" aria-hidden="true"><circle cx="16" cy="16" r="6" fill="#ffcf4a"/><ellipse cx="16" cy="16" rx="14" ry="5.5" fill="none" stroke="#4de1ff" stroke-width="1.6" transform="rotate(-24 16 16)"/></svg>
+      <div><b>VOID EMPIRES</b><span>BLITZ</span></div>
+    </div>
+    <div class="turnbox" aria-live="polite">
+      <div class="turnnum">TURN <b id="turnNum">1</b><i>/20</i></div>
+      <div class="ticks" id="ticks" aria-hidden="true"></div>
+    </div>
+    <div class="topbtns">
+      <span class="seed" title="Galaxy seed">SEED <b id="seedLbl"></b></span>
+      <button class="ghost" id="btnHelp" type="button">How to play</button>
+      <button class="ghost" id="btnReplay" type="button">Replay seed</button>
+      <button class="ghost" id="btnNew" type="button">New galaxy</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="stage" aria-label="Galaxy chart">
+      <div class="events" id="events"></div>
+      <div class="mapscroll"><svg id="map" viewBox="0 0 1000 650" role="group" aria-label="Galaxy map with 20 worlds"></svg></div>
+      <ul class="legend" aria-label="Legend">
+        <li><i class="lg you"></i>You (solid ring, YOU tag)</li>
+        <li><i class="lg riv"></i>Rival (double ring, RIV tag)</li>
+        <li><i class="lg neu"></i>Neutral (dashed)</li>
+        <li><i class="lg rel"></i>Relay (gold hexagon)</li>
+        <li><i class="lg leg"></i>Legal target (pulsing ring)</li>
+        <li><i class="lg shd"></i>Capture-protected (shield)</li>
+      </ul>
+    </section>
+
+    <aside class="side">
+      <div class="empires" id="empires"></div>
+      <section class="panel" id="inspector" aria-label="World inspector"></section>
+      <section class="panel" id="composer" aria-label="Order composer"></section>
+      <section class="panel log" aria-label="Recent actions">
+        <h3>Dispatch log</h3>
+        <ol id="log"></ol>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<dialog id="introDlg" class="dlg">
+  <div class="dlgbody">
+    <p class="eyebrow">20 turns · one order each · two ancient relays</p>
+    <h1>Void Empires <em>Blitz</em></h1>
+    <p>Lead the <b class="c-you">Nadir Accord</b> against the <b class="c-riv">Vulcan Pact</b>. Everything is public, nothing is random in combat, and each shared turn you get exactly one order or a pass.</p>
+    <ol class="steps">
+      <li><b>1 · Select</b> a world on the chart. Selecting spends nothing.</li>
+      <li><b>2 · Choose</b> Expand, Develop or Attack and read the exact price and effect.</li>
+      <li><b>3 · Commit</b> the order, or Pass. The turn then resolves.</li>
+    </ol>
+    <ul class="facts">
+      <li><b>Economy</b> pays 2 Credits per level each turn; <b>Industry</b> pays 1 Military; <b>Defense</b> makes a world costlier to take.</li>
+      <li><b>Relays</b> (08 and 13) awaken at the end of turn 5 (+1 Economy, +1 Industry) and bank <b>+2 prestige</b> per turn for their owner from turn 5 to 20.</li>
+      <li>Turn 11: no Military income. Turns 16–19: attacks cost +8 Military. Captured worlds are shielded for one extra turn.</li>
+      <li>Highest prestige after turn 20 wins: 3 per world + all attributes + banked relay prestige. Capturing every rival world wins at once.</li>
+    </ul>
+    <div class="dlgbtns"><button class="primary" id="btnStart" type="button" autofocus>Begin the campaign</button></div>
+  </div>
+</dialog>
+
+<dialog id="resultDlg" class="dlg">
+  <div class="dlgbody" id="resultBody"></div>
+</dialog>
+
+<div class="sr" id="announce" aria-live="assertive"></div>
+<script src="engine.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
