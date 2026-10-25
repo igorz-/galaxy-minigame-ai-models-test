@@ -4,12 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0",
-    "build": "vite build --base=./",
+    "dev": "node scripts/build.mjs --dev",
+    "bundle": "node scripts/build.mjs",
+    "build": "node scripts/build.mjs --dist",
     "preview": "vite preview --host 0.0.0.0",
     "test": "node --test test/*.test.js"
   },
   "devDependencies": {
+    "esbuild": "^0.25.12",
     "vite": "^6.1.0"
   }
 }

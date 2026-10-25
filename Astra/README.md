@@ -2,23 +2,69 @@
 
 A complete single-player strategy game implementing `TASK.md`. Lead the Sol Accord against the deterministic Vesper Union across a seeded, fully visible galaxy. A match lasts at most 20 shared turns.
 
-## Run
+## Static hosting — no npm required
 
-Requires Node.js 20.19+ or 22.12+.
+The game is plain static HTML, CSS, and JavaScript. All rules, AI, artwork generation, and scoring run in the browser. There is no backend, API, database, or server-side game logic, and no build step is required to play or publish it. You can also open `index.html` directly from disk in Firefox and other modern browsers.
+
+The only files needed to host the game are:
+
+```text
+Astra/
+├── index.html
+├── game.js
+└── src/
+    ├── style.css
+    └── favicon.svg
+```
+
+All game asset paths are relative, so these files work at a domain root, under a repository subdirectory, or through `file://`. The checked-in `game.js` is a self-contained classic script with no runtime module imports or requests for game data.
+
+### GitHub Pages
+
+To publish this repository, including its gallery:
+
+1. Push the repository to GitHub.
+2. Open **Settings → Pages**.
+3. Choose **Deploy from a branch**, select your branch, and select **/(root)**.
+4. Save. Once deployment finishes, open `https://<username>.github.io/<repository>/Astra/`.
+
+The repository-root `.nojekyll` file tells GitHub Pages to serve the files directly without Jekyll processing. The root gallery already links to `Astra/index.html`.
+
+To publish just this game in a separate repository, copy the files listed above to that repository's root and use the same Pages settings. You do not need `node_modules/`, `dist/`, package files, or the tests.
+
+### Preview locally without npm
+
+Double-click `Astra/index.html` to play. Keep `game.js` and the `src/` assets alongside it as shown above. No local server or browser security changes are needed.
+
+Alternatively, from the repository root, use any static HTTP server. For example, with Python installed:
+
+```sh
+python3 -m http.server 8000
+```
+
+Then open `http://localhost:8000/Astra/`. This server only serves files; it does not run game logic.
+
+Fonts use Google Fonts, with local system fallbacks; all planet artwork and starfields are generated locally.
+
+## Optional npm development tools
+
+Vite is a development convenience, not a hosting requirement. The following commands run from `Astra/` and require Node.js 20.19+ or 22.12+.
 
 ```sh
 npm install
 npm run dev
 ```
 
-Open the localhost URL printed by Vite. For a deployable static build:
+Open the localhost URL printed by Vite. The development command watches the source modules and rebuilds `game.js` automatically. After editing source files without the dev server, run `npm run bundle` and commit the updated `game.js` alongside your source changes.
+
+For a minified static release:
 
 ```sh
 npm run build
 npm run preview
 ```
 
-The `dist/` directory can be served by any static web host, including a subdirectory. The unbuilt source also runs from a normal HTTP static server. Fonts use Google Fonts, with local system fallbacks; all planet artwork and starfields are generated locally.
+The generated `dist/` directory can be served by any static web host, including a subdirectory, or opened directly through `dist/index.html`. Publishing the checked-in files directly is equally supported.
 
 ## Play
 
@@ -36,6 +82,8 @@ Relays awaken at the end of turn 5. Each held relay banks two prestige at the en
 
 ## Structure
 
+- `game.js` — generated, checked-in browser bundle; supports direct file opening and no-build hosting.
+- `scripts/build.mjs` — optional bundling, development watching, and static release packaging.
 - `src/engine.js` — pure rules, seeded map generation, shared legality/pricing, deterministic AI, events, and scoring.
 - `src/main.js` — accessible interactive atlas, inspector, order composer, dispatches, intro, and results.
 - `src/art.js` — seeded spherical planet textures and vector starfield generation.
