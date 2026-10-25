@@ -1,238 +1,39 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0a0e10" />
-    <meta
-      name="description"
-      content="A small galaxy. Twenty turns. One empire to remember. A deterministic single-player space strategy game."
-    />
-    <title>Void Empires — Blitz</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Mono:wght@400;450;500;600&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="./src/style.css" />
-    <script type="module" src="./src/main.js"></script>
-  </head>
-  <body>
-    <header class="masthead">
-      <a class="wordmark" href="./"
-        ><span class="brand-symbol" aria-hidden="true">✳</span
-        ><span
-          >VOID EMPIRES<span class="brand-edition"
-            >BLITZ / STRATEGY IN THE STARS</span
-          ></span
-        ></a
-      >
-      <nav aria-label="Main navigation">
-        <span class="nav-current"><span class="live-dot"></span> GALAXY</span
-        ><button id="manual-button">FIELD MANUAL <span>↗</span></button>
-      </nav>
-      <div class="header-actions">
-        <button
-          class="mobile-help icon-button"
-          id="mobile-manual-button"
-          aria-label="Open field manual"
-        >
-          ?</button
-        ><button
-          class="icon-button"
-          id="sound-button"
-          aria-label="Enable sound"
-          aria-pressed="false"
-          title="Toggle interface sound"
-        >
-          ♪<span class="sound-off">/</span></button
-        ><button class="outline-button" id="new-button">
-          NEW GALAXY <span>↗</span>
-        </button>
-      </div>
-    </header>
-
-    <main class="app-shell">
-      <section class="page-heading">
-        <div>
-          <div class="eyebrow">
-            <span class="tiny-cross">+</span> A SMALL GALAXY. AN ENDURING
-            EMPIRE.
-          </div>
-          <h1>The frontier awaits<span>.</span></h1>
-        </div>
-        <div class="turn-panel">
-          <div class="turn-label">
-            SHARED TURN <span id="initiative-label">YOU HAVE INITIATIVE</span>
-          </div>
-          <div class="turn-numbers">
-            <strong id="turn-number">01</strong><span>/ 20</span>
-            <div class="turn-track" id="turn-track" aria-hidden="true"></div>
-          </div>
-        </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#eeeae2">
+  <meta name="description" content="An entire empire. Twenty worlds. Twenty turns. A beautifully compact, deterministic space strategy game.">
+  <title>Perihelion — A Void Empires Game</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23f1eee7'/%3E%3Ctext x='32' y='49' text-anchor='middle' font-size='54' fill='%23c7623e'%3E✳%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+  <header class="masthead">
+    <a class="brand" href="./index.html"><span class="brand-sun" aria-hidden="true">✳</span><span>PERIHELION<small>A VOID EMPIRES GAME</small></span></a>
+    <nav aria-label="Main navigation"><span class="nav-current">The galaxy <span>01</span></span><button id="manual-button">Field manual <span>↗</span></button></nav>
+    <button class="new-game" id="new-button"><span>↻</span> New expedition</button>
+  </header>
+  <main class="shell">
+    <section class="page-heading"><div><div class="eyebrow">A SMALL GALAXY. A GREAT AMBITION.</div><h1>Make your place <em>among the stars.</em></h1></div><div class="edition">SINGLE PLAYER · 20 TURNS<span>NO CHANCE. JUST CHOICES.</span></div></section>
+    <section class="empire-strip" aria-label="Empire overview" id="empire-strip"></section>
+    <section class="intro-bar" id="intro"><span class="intro-icon">↗</span><p><strong>Your empire starts with a single world.</strong> Select a world, choose an order, then commit. Claim the relays to earn prestige from turn 5.</p><button id="intro-close" aria-label="Dismiss introduction">×</button></section>
+    <div class="game-grid">
+      <section class="galaxy" aria-label="Galaxy map">
+        <div class="map-heading"><div><span class="eyebrow">CHARTED SPACE / SECTOR 07</span><h2>The Orpheus Reach<span>20 SYSTEMS</span></h2></div><button id="map-help" class="map-info" aria-label="Open galaxy guide">?</button></div>
+        <div class="map-viewport"><div class="star-chart" id="star-chart"><canvas id="starfield" aria-hidden="true"></canvas><div class="chart-orbit orbit-one"></div><div class="chart-orbit orbit-two"></div><span class="map-coord coord-top">+ 07.214 / − 31.806</span><span class="map-coord coord-bottom">ORPHEUS LOCAL GROUP</span><svg id="lanes" viewBox="0 0 1000 570" preserveAspectRatio="none" aria-label="23 fixed connections between worlds"></svg><div id="worlds"></div></div></div>
+        <div class="map-footer"><div class="legend"><span><i class="human-dot"></i> Your worlds</span><span><i class="ai-dot"></i> Rival worlds</span><span><i class="neutral-dot"></i> Unclaimed</span><span><b>◇</b> Ancient relay</span></div><span class="map-hint">SELECT A WORLD TO BEGIN ↗</span></div>
       </section>
-
-      <section class="empire-strip" aria-label="Empire status">
-        <article class="empire-status human" id="human-status"></article>
-        <div class="versus-mark" aria-hidden="true">VS</div>
-        <article class="empire-status rival" id="ai-status"></article>
-      </section>
-
-      <section class="briefing" id="briefing" aria-label="Mission briefing">
-        <span class="briefing-mark">✳</span>
-        <div>
-          <strong>Your empire starts here.</strong>
-          <p>
-            Select a world <span>→</span> choose an order <span>→</span> commit.
-            Secure ancient relays: they bank prestige from turn 5. Outscore your
-            rival in 20 turns.
-          </p>
-        </div>
-        <button id="begin-button">LET’S EXPLORE <span>↗</span></button>
-      </section>
-
-      <div class="play-layout">
-        <section class="galaxy-column" aria-label="Galaxy and intelligence">
-          <div class="map-panel">
-            <div class="panel-heading">
-              <div>
-                <span class="section-index">01 /</span> GALAXY CHART
-                <span class="map-region">PERSEUS REACH</span>
-              </div>
-              <span class="map-live"
-                ><span class="live-dot"></span> ALL SYSTEMS VISIBLE</span
-              >
-            </div>
-            <div
-              class="galaxy-map"
-              id="galaxy-map"
-              role="group"
-              aria-label="Galaxy chart. Select a world to inspect it."
-            >
-              <div class="map-vignette"></div>
-              <div class="map-coordinate coord-nw">
-                RA 04h 28m<br />DEC +38° 12′
-              </div>
-              <div class="map-coordinate coord-se">
-                20 SYSTEMS<br />23 STAR LANES
-              </div>
-              <svg
-                id="lanes"
-                viewBox="0 0 1000 650"
-                preserveAspectRatio="none"
-                aria-hidden="true"
-              ></svg>
-              <div id="worlds"></div>
-              <div class="map-axis" aria-hidden="true">
-                <span>N</span
-                ><svg viewBox="0 0 44 44">
-                  <path d="M22 2v40M2 22h40M22 6l-4 8h8z" />
-                </svg>
-              </div>
-            </div>
-            <div class="map-footer">
-              <div class="map-legend">
-                <span><i class="legend-human"></i> YOUR WORLD</span
-                ><span><i class="legend-rival"></i> RIVAL</span
-                ><span><i class="legend-neutral"></i> NEUTRAL</span
-                ><span><i class="legend-relay">◇</i> RELAY</span
-                ><span><i class="legend-legal">+</i> LEGAL TARGET</span>
-              </div>
-              <span class="map-hint">SELECT A WORLD TO COMMAND</span>
-            </div>
-          </div>
-          <div class="intel-grid">
-            <section class="forecast-panel">
-              <div class="small-heading">
-                <span class="section-index">02 /</span> COSMIC FORECAST
-                <span id="event-time"></span>
-              </div>
-              <div id="forecast-content"></div>
-            </section>
-            <section class="activity-panel">
-              <div class="small-heading">
-                <span class="section-index">03 /</span> TRANSMISSION LOG
-                <span class="live-dot"></span>
-              </div>
-              <div
-                id="activity"
-                role="log"
-                aria-label="Recent actions"
-                aria-live="polite"
-              ></div>
-              <button class="text-button" id="log-button">
-                VIEW FULL TRANSMISSION LOG <span>↗</span>
-              </button>
-            </section>
-          </div>
-        </section>
-
-        <aside
-          class="command-panel"
-          aria-label="Selected world and order composer"
-        >
-          <div class="panel-heading">
-            <div>
-              <span class="section-index">04 /</span> WORLD INTELLIGENCE
-            </div>
-            <span id="selected-number">SYS 06</span>
-          </div>
-          <div id="inspector"></div>
-          <section class="order-composer" aria-label="Order composer">
-            <div class="small-heading">
-              ISSUE AN ORDER <span>ONE PER TURN</span>
-            </div>
-            <div class="order-tabs" role="group" aria-label="Order type">
-              <button data-order="expand" aria-pressed="false">
-                <span>⊕</span>Expand</button
-              ><button data-order="develop" aria-pressed="false">
-                <span>⌁</span>Develop</button
-              ><button data-order="attack" aria-pressed="false">
-                <span>⌖</span>Attack
-              </button>
-            </div>
-            <div
-              id="attribute-controls"
-              class="attribute-controls"
-              hidden
-              role="group"
-              aria-label="Development attribute"
-            ></div>
-            <div
-              class="order-preview"
-              id="order-preview"
-              aria-live="polite"
-            ></div>
-            <div class="commit-row">
-              <button id="commit-button" class="primary-button" disabled>
-                COMMIT ORDER <span>↗</span></button
-              ><button id="pass-button" class="pass-button">
-                PASS <span>→</span>
-              </button>
-            </div>
-            <p class="command-note" id="command-note">
-              Orders resolve immediately. No second confirmation.
-            </p>
-          </section>
-          <div class="relay-objective">
-            <span class="objective-icon">◇</span>
-            <div>
-              <strong>Control the signal. Claim the galaxy.</strong>
-              <p>
-                Each relay earns +2 prestige per turn from turn 5. Reserves
-                don’t count toward victory.
-              </p>
-            </div>
-          </div>
-        </aside>
-      </div>
-      <footer class="site-footer">
-        <span>VOID EMPIRES <span class="footer-slash">/</span> BLITZ</span
-        ><span id="seed-label"></span><span>NO LUCK. JUST YOUR NEXT MOVE.</span>
-      </footer>
-    </main>
-    <div class="toast" id="toast" role="status" hidden></div>
-    <dialog id="modal"><div id="modal-content"></div></dialog>
-  </body>
+      <aside class="command-panel" aria-label="Selected world and orders" id="inspector"></aside>
+    </div>
+    <section class="bottom-grid"><article class="forecast" id="forecast"></article><article class="activity"><div class="section-head"><h2>Dispatches</h2><span>LIVE FROM THE REACH <i></i></span></div><div id="activity-log" role="log" aria-label="Recent actions"></div></article><article class="mission"><div class="eyebrow">THE OBJECTIVE</div><h2>Leave a lasting<br><em>impression.</em></h2><p>Own worlds. Build your economy.<br>Hold the relays. Most prestige wins.</p><button id="scoring-button">How prestige works <span>↗</span></button></article></section>
+    <footer class="page-footer"><span>PERIHELION <i> / </i> A STRATEGY IN SMALL DECISIONS</span><span id="seed-label"></span><span>BUILT FOR THE CURIOUS.</span></footer>
+  </main>
+  <div id="announcement" class="sr-only" role="status" aria-live="polite"></div>
+  <dialog id="manual-dialog" class="manual-dialog"><button class="dialog-close" data-close aria-label="Close field manual">×</button><div class="eyebrow">A FIELD MANUAL FOR THE AMBITIOUS</div><h2>Twenty turns.<br><em>Make them count.</em></h2><p class="manual-lead">An open galaxy. A predictable rival. Every decision is yours.</p><div class="manual-steps"><div><b>01</b><h3>Select a world</h3><p>All 20 worlds are visible. Lanes determine where you can expand or attack.</p></div><div><b>02</b><h3>Choose an order</h3><p>Expand your borders, develop a world, or attack the rival. Inspect exact costs first.</p></div><div><b>03</b><h3>Commit, or pass</h3><p>One order each per shared turn. You go first on odd turns; the rival goes first on even turns.</p></div></div><div class="manual-rules"><p><strong>Build an engine.</strong> Every turn, each world generates 2 × Economy in Credits and 1 × Industry in Military. Develop any attribute for 8 Credits, up to level 5. Expansion costs 12 + 4 per world you already own.</p><p><strong>Take your chances. Without chance.</strong> An attack costs 8 Credits and 4 + 6 × target Defense in Military. Captures preserve attributes and protect the world through the next turn. Losing your home is not defeat; losing your final world is.</p><p><strong>Own the middle.</strong> The two relays awaken at the end of turn 5, gaining +1 Economy and Industry (max 5). Each held relay banks 2 prestige at the end of turns 5–20.</p><p><strong>Watch the horizon.</strong> Turn 11 brings no Military income. Attacks cost +8 Military on turns 16–19 only. Nothing is hidden and combat has no dice rolls.</p><p><strong>Leave a legacy.</strong> At the end of turn 20: <b>3 per world + all attribute levels + banked relay prestige.</b> Credits and Military do not score. Equal prestige is a draw.</p></div><button class="primary" data-close>To the stars <span>↗</span></button></dialog>
+  <dialog id="new-dialog" class="small-dialog"><button class="dialog-close" data-close aria-label="Cancel">×</button><div class="eyebrow">A NEW BEGINNING</div><h2>Another <em>horizon?</em></h2><p>Your current expedition will be replaced. Replay this seed for the same worlds, or chart a fresh galaxy.</p><button class="primary" id="confirm-new">New galaxy <span>↗</span></button><button class="secondary" id="confirm-replay">Replay seed</button></dialog>
+  <dialog id="result-dialog" class="result-dialog"></dialog>
+  <script defer src="./src/game.bundle.js"></script>
+</body>
 </html>
