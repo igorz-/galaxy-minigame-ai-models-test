@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Void Empires · Blitz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#05070d;
+  --panel:rgba(13,17,28,.78);
+  --panel-solid:#0d1120;
+  --line:rgba(126,146,192,.16);
+  --line-soft:rgba(126,146,192,.09);
+  --ink:#dde4f2;
+  --muted:#8390aa;
+  --gold:#d9a94e;
+  --gold-soft:rgba(217,169,78,.14);
+  --human:#49d0b8;
+  --human-soft:rgba(73,208,184,.12);
+  --rival:#ff6d52;
+  --rival-soft:rgba(255,109,82,.12);
+  --neutral:#93a0b8;
+  --danger:#ff8d77;
+  --radius:14px;
+  font-size:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,sans-serif;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:-2;
+  background:
+    radial-gradient(1100px 700px at 18% -10%, rgba(64,88,150,.20), transparent 60%),
+    radial-gradient(900px 600px at 110% 30%, rgba(140,64,64,.12), transparent 60%),
+    radial-gradient(700px 500px at 50% 120%, rgba(217,169,78,.06), transparent 60%),
+    #05070d;
+}
+h1,h2,h3,.display{font-family:'Marcellus',Georgia,serif;font-weight:400;letter-spacing:.02em}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+button:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+b{font-weight:600}
+small{font-size:.78rem}
+
+/* ---------- header ---------- */
+header.top{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+  padding:14px 22px;border-bottom:1px solid var(--line-soft);
+  background:linear-gradient(180deg, rgba(10,13,22,.92), rgba(10,13,22,.55));
+  backdrop-filter:blur(6px);
+  position:sticky;top:0;z-index:40;
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand .mark{width:38px;height:38px;flex:none}
+.brand h1{font-size:1.28rem;line-height:1.1}
+.brand .sub{display:block;color:var(--muted);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;margin-top:2px}
+.status{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:99px;border:1px solid var(--line);
+  background:rgba(20,25,40,.6);font-size:.8rem;color:var(--muted);white-space:nowrap;
+}
+.chip b{color:var(--ink)}
+.chip.turn b{color:var(--gold)}
+.chip.human b{color:var(--human)}
+.chip.rival b{color:var(--rival)}
+.ghost{
+  padding:6px 14px;border-radius:99px;border:1px solid var(--line);
+  color:var(--muted);font-size:.8rem;letter-spacing:.06em;transition:.15s;
+}
+.ghost:hover{color:var(--ink);border-color:var(--gold);background:var(--gold-soft)}
+
+/* ---------- layout ---------- */
+.layout{
+  display:grid;grid-template-columns:minmax(0,1fr) 380px;
+  gap:18px;padding:18px 22px 40px;max-width:1440px;margin:0 auto;
+}
+.panel{
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:var(--radius);
+  backdrop-filter:blur(8px);
+}
+.panel h3{
+  font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);
+  padding:12px 16px 8px;display:flex;align-items:center;gap:8px;
+}
+.panel h3::after{content:"";flex:1;height:1px;background:var(--line-soft)}
+
+/* ---------- map ---------- */
+.map-wrap{position:relative;overflow:hidden;min-height:420px}
+.map-wrap svg{display:block;width:100%;height:auto;min-height:420px}
+.map-scroll{overflow-x:auto;overflow-y:hidden}
+.map-scroll svg{min-width:760px}
+.map-corner{
+  position:absolute;top:10px;left:16px;font-size:.66rem;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--muted);pointer-events:none;
+}
+.legend{
+  position:absolute;bottom:10px;left:16px;display:flex;gap:14px;flex-wrap:wrap;
+  font-size:.68rem;color:var(--muted);pointer-events:none;
+}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
+
+/* SVG pieces */
+.lane{stroke:rgba(126,146,192,.22);stroke-width:1.4;transition:.25s}
+.lane.touched{stroke:var(--gold);stroke-width:1.8;filter:drop-shadow(0 0 3px rgba(217,169,78,.55))}
+.star{fill:#cdd6ea}
+.star.faint{fill:#5d6784}
+.star.warm{fill:#e8c98d}
+.world{cursor:pointer}
+.world .body{transition:.25s;stroke-width:0}
+.world .rim{fill:none;stroke-width:1.2;opacity:.55;transition:.25s}
+.world.owner-h .body{fill:url(#gH)}
+.world.owner-a .body{fill:url(#gA)}
+.world.owner-n .body{fill:url(#gN)}
+.world.owner-h .rim{stroke:var(--human)}
+.world.owner-a .rim{stroke:var(--rival)}
+.world.owner-n .rim{stroke:#6f7c95}
+.world.relay.owner-h .rim{stroke:var(--gold)}
+.world.relay.owner-a .rim{stroke:var(--gold)}
+.world .num{font-size:9.5px;fill:rgba(221,228,242,.6);text-anchor:middle;font-family:'Inter';font-weight:600;letter-spacing:.08em}
+.world .wname{font-size:12.5px;fill:var(--ink);text-anchor:middle;font-family:'Marcellus',Georgia,serif;paint-order:stroke;stroke:rgba(5,7,13,.85);stroke-width:3.5}
+.world.owner-h .wname{fill:#bff2e9}
+.world.owner-a .wname{fill:#ffd3c9}
+.world.relay .wname{fill:#f3ddad}
+.world .pips{opacity:.85}
+.world .sel-ring{
+  fill:none;stroke:var(--gold);stroke-width:1.6;stroke-dasharray:4 5;opacity:0;
+  transform-box:fill-box;transform-origin:center;transition:.2s;pointer-events:none;
+}
+.world.selected .sel-ring{opacity:.95;animation:spin 14s linear infinite}
+.world.staged .sel-ring{stroke:#fff;stroke-dasharray:2 4;opacity:.95;animation:spin 6s linear infinite}
+.world .halo{
+  fill:none;stroke-width:1.5;opacity:0;pointer-events:none;
+  stroke:var(--gold);transform-box:fill-box;transform-origin:center;
+}
+.world.legal .halo{opacity:.9;animation:pulse 1.6s ease-in-out infinite}
+.world.legal .halo.action-attack{stroke:var(--rival)}
+.world.legal .halo.action-expand{stroke:var(--gold)}
+.world.legal .halo.action-develop{stroke:var(--human)}
+.world .relay-ring{
+  fill:none;stroke:var(--gold);stroke-width:1;stroke-dasharray:2.5 3.5;opacity:.75;
+  transform-box:fill-box;transform-origin:center;animation:spin 40s linear infinite;
+}
+.world .home-mark{fill:none;stroke-width:1.3}
+.world.owner-h .home-mark{stroke:var(--human)}
+.world.owner-a .home-mark{stroke:var(--rival)}
+.world .prot{
+  opacity:0;font-size:9px;font-weight:700;fill:#0d1120;text-anchor:middle;
+}
+.world.protected .prot{opacity:1}
+.world .prot-bg{opacity:0}
+.world.protected .prot-bg{opacity:1}
+.world:focus{outline:none}
+.world:focus .rim{stroke:#fff;stroke-width:2.2}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.9}50%{transform:scale(1.12);opacity:.35}}
+
+/* ---------- side panels ---------- */
+.side{display:flex;flex-direction:column;gap:14px}
+.empires{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.emp{
+  padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+  background:var(--panel);position:relative;overflow:hidden;
+}
+.emp::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px}
+.emp.h::before{background:var(--human)}
+.emp.a::before{background:var(--rival)}
+.emp .who{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.emp .who i{width:8px;height:8px;border-radius:50%}
+.emp.h .who i{background:var(--human);box-shadow:0 0 8px var(--human)}
+.emp.a .who i{background:var(--rival);box-shadow:0 0 8px var(--rival)}
+.emp .who span{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.emp .stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;font-size:.85rem}
+.emp .stats label{color:var(--muted);font-size:.68rem;display:block;text-transform:uppercase;letter-spacing:.08em}
+.emp.h .stats b{color:#bff2e9}
+.emp.a .stats b{color:#ffd3c9}
+.emp .prest{margin-top:9px;padding-top:8px;border-top:1px solid var(--line-soft);font-size:.8rem;color:var(--muted);display:flex;justify-content:space-between;align-items:baseline}
+.emp .prest b{font-size:1.05rem;color:var(--gold)}
+.emp.dead{opacity:.5}
+
+/* inspector */
+.inspector .body-inspect{padding:4px 16px 14px;font-size:.88rem}
+.inspect-title{display:flex;align-items:baseline;gap:10px;margin-bottom:2px}
+.inspect-title .nm{font-family:'Marcellus';font-size:1.25rem}
+.inspect-title .no{color:var(--muted);font-size:.78rem;letter-spacing:.1em}
+.badges{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}
+.badge{
+  font-size:.66rem;padding:2px 9px;border-radius:99px;letter-spacing:.08em;
+  text-transform:uppercase;border:1px solid var(--line);color:var(--muted);
+}
+.badge.you{color:var(--human);border-color:rgba(73,208,184,.4);background:var(--human-soft)}
+.badge.rival{color:var(--rival);border-color:rgba(255,109,82,.4);background:var(--rival-soft)}
+.badge.neutral{color:var(--neutral)}
+.badge.relay{color:var(--gold);border-color:rgba(217,169,78,.45);background:var(--gold-soft)}
+.badge.protected{color:#ffb1a0;border-color:rgba(255,141,119,.4)}
+.attr-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.attr{
+  background:rgba(9,12,21,.65);border:1px solid var(--line-soft);border-radius:10px;
+  padding:8px 6px;text-align:center;
+}
+.attr label{display:block;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.attr b{font-size:1.05rem}
+.attr.e b{color:#e8c98d}.attr.i b{color:#c9a1ff}.attr.d b{color:#7fb4ff}
+.prod-line,.rule-lines{font-size:.8rem;color:var(--muted)}
+.prod-line b{color:var(--ink)}
+.protnote{margin-top:8px;font-size:.78rem;color:#ffb1a0}
+
+/* composer */
+.composer .order-tabs{display:flex;gap:8px;padding:4px 16px 0}
+.tab{
+  flex:1;padding:9px 6px;border-radius:10px;border:1px solid var(--line);
+  background:rgba(9,12,21,.5);font-size:.8rem;letter-spacing:.04em;color:var(--muted);
+  transition:.15s;display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.tab .ic{font-size:1rem;line-height:1}
+.tab small{font-size:.62rem;color:var(--muted)}
+.tab:hover{border-color:var(--gold);color:var(--ink)}
+.tab.active{border-color:var(--gold);color:var(--ink);background:var(--gold-soft);box-shadow:inset 0 0 18px rgba(217,169,78,.07)}
+.tab.active .ic{color:var(--gold)}
+.attr-picker{display:none;gap:8px;padding:10px 16px 0}
+.attr-picker.show{display:flex}
+.attr-btn{
+  flex:1;padding:6px;border-radius:8px;border:1px solid var(--line);font-size:.72rem;
+  letter-spacing:.06em;color:var(--muted);transition:.15s;
+}
+.attr-btn:hover{color:var(--ink);border-color:var(--gold)}
+.attr-btn.active{color:var(--ink);border-color:var(--gold);background:var(--gold-soft)}
+.preview{
+  margin:12px 16px 0;padding:11px 13px;border-radius:10px;
+  background:rgba(9,12,21,.55);border:1px solid var(--line-soft);font-size:.85rem;min-height:56px;
+}
+.preview .cost{margin-top:6px;display:flex;gap:14px;flex-wrap:wrap;font-size:.8rem}
+.preview .cost span{color:var(--muted)}
+.preview.ok .cost b{color:var(--gold)}
+.preview.bad{color:var(--danger)}
+.preview .effect{color:var(--muted);font-size:.8rem;margin-top:3px}
+.actions{display:flex;gap:10px;padding:12px 16px 14px}
+.btn{
+  flex:1;padding:11px;border-radius:10px;font-weight:600;font-size:.9rem;
+  letter-spacing:.06em;transition:.15s;border:1px solid transparent;text-align:center;
+}
+.btn.primary{background:linear-gradient(180deg,#e2b35c,#c1903c);color:#1c1200;box-shadow:0 2px 14px rgba(217,169,78,.25)}
+.btn.primary:hover:not(:disabled){filter:brightness(1.1)}
+.btn.primary:disabled{background:rgba(60,60,60,.35);color:rgba(221,228,242,.35);box-shadow:none;cursor:not-allowed}
+.btn.pass{border-color:var(--line);color:var(--muted)}
+.btn.pass:hover:not(:disabled){color:var(--ink);border-color:var(--gold)}
+.btn.pass:disabled{opacity:.4;cursor:not-allowed}
+
+/* forecast */
+.forecast .fc{padding:2px 16px 14px;font-size:.83rem;color:var(--muted)}
+.forecast .fc b{color:var(--ink)}
+.fc-tag{display:inline-block;font-size:.62rem;letter-spacing:.16em;text-transform:uppercase;padding:2px 8px;border-radius:99px;margin-bottom:6px}
+.fc-tag.now{background:var(--rival-soft);color:var(--rival);border:1px solid rgba(255,109,82,.35)}
+.fc-tag.next{background:var(--gold-soft);color:var(--gold);border:1px solid rgba(217,169,78,.35)}
+
+/* log */
+.log ol{list-style:none;max-height:220px;overflow-y:auto;padding:0 16px 14px;font-size:.8rem}
+.log li{padding:5px 0;border-bottom:1px solid var(--line-soft);color:var(--muted);display:flex;gap:8px}
+.log li:last-child{border-bottom:none}
+.log li .t{color:var(--gold);flex:none;font-size:.7rem;padding-top:2px;font-variant-numeric:tabular-nums}
+.log li.human{color:#a8dfd6}
+.log li.rival{color:#ffc2b5}
+.log li.system{color:var(--muted)}
+.log li.prestige{color:#e8c98d}
+.log::-webkit-scrollbar{width:8px}
+.log::-webkit-scrollbar-thumb{background:rgba(126,146,192,.25);border-radius:99px}
+
+/* overlays */
+.overlay{
+  position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+  background:rgba(4,6,11,.82);backdrop-filter:blur(10px);padding:20px;overflow-y:auto;
+}
+.overlay[hidden]{display:none}
+.sheet{
+  max-width:620px;width:100%;background:linear-gradient(180deg,#111524,#0b0e1a);
+  border:1px solid rgba(217,169,78,.28);border-radius:18px;
+  padding:34px 36px;box-shadow:0 30px 90px rgba(0,0,0,.6);
+  max-height:90vh;overflow-y:auto;
+}
+.sheet .kicker{font-size:.68rem;letter-spacing:.28em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.sheet h2{font-size:1.9rem;margin-bottom:6px}
+.sheet .lede{color:var(--muted);font-size:.92rem;margin-bottom:20px}
+.steps{display:grid;gap:10px;margin:18px 0}
+.step{display:flex;gap:14px;align-items:flex-start;padding:13px 15px;border:1px solid var(--line-soft);border-radius:12px;background:rgba(9,12,21,.5)}
+.step .n{
+  width:30px;height:30px;flex:none;border-radius:50%;border:1px solid var(--gold);
+  display:flex;align-items:center;justify-content:center;color:var(--gold);
+  font-family:'Marcellus';font-size:.95rem;
+}
+.step b{display:block;font-size:.9rem}
+.step p{font-size:.8rem;color:var(--muted);margin-top:2px}
+.note{
+  margin-top:16px;padding:13px 15px;border-left:2px solid var(--gold);
+  background:var(--gold-soft);border-radius:0 10px 10px 0;font-size:.82rem;color:var(--muted);
+}
+.note b{color:#e8c98d}
+.sheet .cta{margin-top:24px;display:flex;gap:12px}
+.resultverdict{text-align:center;margin:14px 0 20px}
+.resultverdict .big{font-family:'Marcellus';font-size:2.1rem}
+.resultverdict .why{color:var(--muted);font-size:.85rem;margin-top:4px}
+.scoretable{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}
+.scoretable th,.scoretable td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line-soft)}
+.scoretable th{font-size:.66rem;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-weight:500}
+.scoretable td:first-child,.scoretable th:first-child{text-align:left}
+.scoretable .total td{font-weight:700;color:var(--gold);border-bottom:none}
+.scoretable td.you{color:#bff2e9}
+.scoretable td.riv{color:#ffd3c9}
+.kv{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--line-soft);font-size:.85rem}
+.kv span{color:var(--muted)}
+.seedline{text-align:center;color:var(--muted);font-size:.75rem;margin-top:14px;letter-spacing:.1em}
+
+/* responsive */
+@media (max-width:1020px){
+  .layout{grid-template-columns:1fr;padding:14px}
+  .empires{grid-template-columns:1fr 1fr}
+  .side{flex-direction:column}
+}
+@media (max-width:640px){
+  header.top{padding:12px 14px}
+  .brand h1{font-size:1.05rem}
+  .empires{grid-template-columns:1fr}
+  .sheet{padding:26px 22px}
+  .map-wrap svg{min-height:360px}
+  .actions .btn{padding:12px}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">
+    <svg class="mark" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="20" r="17.5" fill="none" stroke="#d9a94e" stroke-width="1.2" stroke-dasharray="3 4"/>
+      <circle cx="20" cy="20" r="9" fill="none" stroke="#49d0b8" stroke-width="1.4"/>
+      <circle cx="27" cy="14" r="3.2" fill="#ff6d52"/>
+      <circle cx="20" cy="20" r="2" fill="#d9a94e"/>
+    </svg>
+    <div>
+      <h1>Void Empires</h1>
+      <span class="sub">Blitz · twenty turns for the relay network</span>
+    </div>
+  </div>
+  <div class="status">
+    <span class="chip turn">Turn <b id="hudTurn">–</b> / 20</span>
+    <span class="chip" id="hudInit"><b>—</b></span>
+    <span class="chip">Seed <b id="hudSeed">—</b></span>
+    <button class="ghost" id="helpBtn" type="button">Briefing</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="panel map-wrap" aria-label="Galaxy chart">
+    <span class="map-corner">Sector Chart · 20 worlds · 23 lanes</span>
+    <div class="map-scroll">
+      <svg id="map" viewBox="0 0 960 720" role="group" aria-label="Galaxy map">
+        <defs>
+          <radialGradient id="gH" cx="35%" cy="30%" r="80%">
+            <stop offset="0%" stop-color="#9df0e2"/><stop offset="45%" stop-color="#2fae97"/><stop offset="100%" stop-color="#0d3f38"/>
+          </radialGradient>
+          <radialGradient id="gA" cx="35%" cy="30%" r="80%">
+            <stop offset="0%" stop-color="#ffb09b"/><stop offset="45%" stop-color="#d9563a"/><stop offset="100%" stop-color="#4a170d"/>
+          </radialGradient>
+          <radialGradient id="gN" cx="35%" cy="30%" r="80%">
+            <stop offset="0%" stop-color="#b9c3d8"/><stop offset="50%" stop-color="#66738d"/><stop offset="100%" stop-color="#1b2130"/>
+          </radialGradient>
+          <radialGradient id="gR" cx="35%" cy="30%" r="80%">
+            <stop offset="0%" stop-color="#ffe9b8"/><stop offset="45%" stop-color="#d9a94e"/><stop offset="100%" stop-color="#4d350a"/>
+          </radialGradient>
+        </defs>
+        <g id="stars"></g>
+        <g id="lanes"></g>
+        <g id="worlds"></g>
+      </svg>
+    </div>
+    <div class="legend" aria-hidden="true">
+      <span><i style="background:var(--human)"></i>Yours</span>
+      <span><i style="background:var(--rival)"></i>Rival</span>
+      <span><i style="background:var(--neutral)"></i>Unclaimed</span>
+      <span><i style="background:var(--gold)"></i>Ancient relay</span>
+      <span>✕ capture-protected</span>
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="empires" aria-label="Empire status">
+      <div class="emp h" id="empH"></div>
+      <div class="emp a" id="empA"></div>
+    </div>
+
+    <section class="panel forecast" aria-label="Scheduled event">
+      <h3>Chronometer</h3>
+      <div class="fc" id="forecast"></div>
+    </section>
+
+    <section class="panel inspector" aria-label="World inspector">
+      <h3>World Inspector</h3>
+      <div class="body-inspect" id="inspector"></div>
+    </section>
+
+    <section class="panel composer" aria-label="Order composer">
+      <h3>Orders</h3>
+      <div class="order-tabs" role="tablist">
+        <button class="tab" id="tabExpand" type="button"><span class="ic">◎</span>Expand<small>claim a linked world</small></button>
+        <button class="tab" id="tabDevelop" type="button"><span class="ic">△</span>Develop<small>+1 to one attribute</small></button>
+        <button class="tab" id="tabAttack" type="button"><span class="ic">✦</span>Attack<small>seize a linked enemy world</small></button>
+      </div>
+      <div class="attr-picker" id="attrPicker" role="group" aria-label="Development attribute">
+        <button class="attr-btn" data-attr="e" type="button">Economy</button>
+        <button class="attr-btn" data-attr="i" type="button">Industry</button>
+        <button class="attr-btn" data-attr="d" type="button">Defense</button>
+      </div>
+      <div class="preview" id="preview" aria-live="polite">Select a world to begin.</div>
+      <div class="actions">
+        <button class="btn primary" id="commitBtn" type="button" disabled>Commit</button>
+        <button class="btn pass" id="passBtn" type="button">Pass</button>
+      </div>
+    </section>
+
+    <section class="panel log" aria-label="Recent actions">
+      <h3>Signal Log</h3>
+      <ol id="logList"></ol>
+    </section>
+  </aside>
+</main>
+
+<!-- intro -->
+<div class="overlay" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="sheet">
+    <div class="kicker">A pocket war for one sector</div>
+    <h2 id="introTitle">Void Empires · Blitz</h2>
+    <p class="lede">You and a rival power awake on opposite ends of a twenty-world sector. Twenty shared turns. One order each per turn. No dice — every price and every lane is on the chart.</p>
+    <div class="steps">
+      <div class="step"><div class="n">1</div><div><b>Select a world</b><p>Tap any planet. The inspector shows its owner, attributes and production.</p></div></div>
+      <div class="step"><div class="n">2</div><div><b>Stage an order</b><p>Expand onto a linked unclaimed world, Develop one attribute of a world you hold, or Attack a linked enemy world. Illegal options explain exactly why.</p></div></div>
+      <div class="step"><div class="n">3</div><div><b>Commit — or pass</b><p>One order per turn, then your rival answers. On odd turns you act first; on even turns it does.</p></div></div>
+    </div>
+    <div class="note"><b>The ancient relays.</b> The two gold-ringed worlds (08 &amp; 13) are relics worth 2 prestige each to their holder at the end of every turn from 5 onward — 32 over a full game. They awaken at the end of turn 5, gaining +1 Economy and +1 Industry. Win by eliminating the rival, or by the higher prestige when the galaxy is scored after turn 20.</div>
+    <div class="note" style="border-left-color:var(--rival);background:var(--rival-soft)"><b>Marked on the calendar.</b> Turn 11: a supernova suppresses all Military income for both sides. Turns 16–19: a blockade adds +8 Military to every attack.</div>
+    <p class="seedline">Hotkeys: <b>1</b> Expand · <b>2</b> Develop · <b>3</b> Attack · <b>P</b> Pass</p>
+    <div class="cta">
+      <button class="btn primary" id="startBtn" type="button">Begin the Campaign</button>
+    </div>
+  </div>
+</div>
+
+<!-- result -->
+<div class="overlay" id="result" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden>
+  <div class="sheet">
+    <div class="kicker">End of record</div>
+    <div class="resultverdict">
+      <div class="big" id="resultTitle">—</div>
+      <div class="why" id="resultWhy">—</div>
+    </div>
+    <table class="scoretable" id="scoreTable"></table>
+    <div class="cta">
+      <button class="btn primary" id="newGalaxyBtn" type="button">New Galaxy</button>
+      <button class="btn pass" id="replayBtn" type="button">Replay Seed</button>
+    </div>
+    <p class="seedline" id="resultSeed"></p>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* =========================================================
+   VOID EMPIRES · BLITZ — rules engine, deterministic AI, UI
+   ========================================================= */
+const CONFIG = {
+  TURNS: 20,
+  HOME_H: 5, HOME_A: 14,
+  RELAYS: [7, 12],
+  START_CREDITS: 14, START_MIL: 0,
+  EXPAND_BASE: 12, EXPAND_PER: 4,
+  DEVELOP_COST: 8,
+  ATTACK_CREDITS: 8, ATTACK_BASE: 4, ATTACK_PER_DEF: 6,
+  BLOCKADE_SURCHARGE: 8,
+  RELAY_PAYOUT: 2,
+  AWAKEN_TURN: 5, PRESTIGE_FROM: 5, NO_MIL_TURN: 11,
+  BLOCKADE_FROM: 16, BLOCKADE_TO: 19,
+};
+const ATTR_NAMES = { e:'Economy', i:'Industry', d:'Defense' };
+const PROFILES = {
+  trade:   { label:'Trade',   e:3, i:1, d:1 },
+  forge:   { label:'Forge',   e:1, i:3, d:1 },
+  bastion: { label:'Bastion', e:1, i:1, d:3 },
+};
+const WORLD_NAMES = [
+  'Kestrel','Umbra','Thalassa','Petra','Halcyon',
+  'Nadir','Vela','Meridian I','Orion','Calla',
+  'Sable','Umbriel','Meridian II','Corvus','Vulcan',
+  'Lumen','Ashfall','Nyx','Solace','Kepler'
+];
+const EMPIRE_NAME = { H:'You', A:'The rival' };
+const POS = (() => {
+  const p = [];
+  const jitter = [
+    [-6, 8],[10,-4],[-8,-10],[4,12],[-12, 6],
+    [-2,-14],[14, 10],[-10, 4],[8,-8],[-4, 10],
+    [12, 12],[-14,-6],[6,-10],[-8, 12],[10,-2],
+    [-6, 6],[14,-12],[-10,-8],[4, 14],[-12,-4]
+  ];
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) {
+    const id = r * 5 + c;
+    p[id] = { x: 110 + c * 185 + jitter[id][0], y: 112 + r * 165 + jitter[id][1] };
+  }
+  return p;
+})();
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* ---------- topology ---------- */
+const LINKS = (() => {
+  const L = [];
+  for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) L.push([r*5+c, r*5+c+1]);
+  for (const c of [0, 4]) for (let r = 0; r < 3; r++) L.push([r*5+c, (r+1)*5+c]);
+  L.push([CONFIG.RELAYS[0], CONFIG.RELAYS[1]]);
+  return L; // 23 lanes
+})();
+const NEIGH = (() => {
+  const n = Array.from({length:20}, () => []);
+  for (const [a,b] of LINKS){ n[a].push(b); n[b].push(a); }
+  return n;
+})();
+const num2 = id => String(id + 1).padStart(2, '0');
+
+/* ---------- state ---------- */
+let S = null;
+
+function buildGalaxy(seed){
+  const rng = mulberry32(seed);
+  const pairProfile = {};
+  for (let id = 0; id < 10; id++){
+    const mate = 19 - id;
+    let p;
+    if (id === 0) p = 'forge';
+    else if (id === 6) p = 'trade';
+    else p = ['trade','forge','bastion'][Math.floor(rng() * 3)];
+    pairProfile[id] = p; pairProfile[mate] = p;
+  }
+  const worlds = [];
+  for (let id = 0; id < 20; id++){
+    const base = PROFILES[pairProfile[id]];
+    let label = base.label;
+    if (id === CONFIG.HOME_H || id === CONFIG.HOME_A) label = 'Homeworld';
+    if (CONFIG.RELAYS.includes(id)) label = 'Relay';
+    worlds.push({
+      id, name: WORLD_NAMES[id], label,
+      owner: null, e: base.e, i: base.i, d: base.d,
+      protectedUntil: 0, // protected through this turn; attackable after
+    });
+  }
+  for (const id of [CONFIG.HOME_H, CONFIG.HOME_A]){
+    worlds[id].e = 3; worlds[id].i = 2; worlds[id].d = 2;
+  }
+  worlds[CONFIG.HOME_H].owner = 'H';
+  worlds[CONFIG.HOME_A].owner = 'A';
+  for (const id of CONFIG.RELAYS){ worlds[id].e = 2; worlds[id].i = 2; worlds[id].d = 2; }
+  return worlds;
+}
+
+function newMatch(seed){
+  S = {
+    seed,
+    turn: 0,
+    phase: 'human',          // 'human' | 'over'
+    worlds: buildGalaxy(seed),
+    emp: {
+      H: { credits: CONFIG.START_CREDITS, military: CONFIG.START_MIL, prestige: 0, alive: true },
+      A: { credits: CONFIG.START_CREDITS, military: CONFIG.START_MIL, prestige: 0, alive: true },
+    },
+    log: [],
+    staged: { type: null, attr: 'e' },
+    selected: CONFIG.HOME_H,
+    result: null,
+  };
+  document.getElementById('hudSeed').textContent = seed;
+  document.getElementById('logList').innerHTML = '';
+  startTurn();
+}
+
+/* ---------- rules ---------- */
+const owned = emp => S.worlds.filter(w => w.owner === emp);
+const isProtected = (w, t) => t <= w.protectedUntil;
+const blockadeOn = t => t >= CONFIG.BLOCKADE_FROM && t <= CONFIG.BLOCKADE_TO;
+const expandCost = emp => CONFIG.EXPAND_BASE + CONFIG.EXPAND_PER * owned(emp).length;
+const attackMilCost = (w, t) =>
+  CONFIG.ATTACK_BASE + CONFIG.ATTACK_PER_DEF * w.d + (blockadeOn(t) ? CONFIG.BLOCKADE_SURCHARGE : 0);
+function adjacentToEmpire(w, emp){
+  return NEIGH[w.id].some(n => S.worlds[n].owner === emp);
+}
+function incomeOf(emp){
+  const ws = owned(emp);
+  return {
+    credits: 2 * ws.reduce((s, w) => s + w.e, 0),
+    military: S.turn === CONFIG.NO_MIL_TURN ? 0 : ws.reduce((s, w) => s + w.i, 0),
+  };
+}
+function planetValue(emp){
+  const ws = owned(emp);
+  const attrs = ws.reduce((s, w) => s + w.e + w.i + w.d, 0);
+  return 3 * ws.length + attrs;
+}
+const totalPrestige = emp => planetValue(emp) + S.emp[emp].prestige;
+
+/* legality — shared by human preview and AI */
+function legality(emp, type, w, attr, turn){
+  const E = S.emp[emp];
+  const foe = emp === 'H' ? 'A' : 'H';
+  const noRoute = 'No direct lane from ' + (emp === 'H' ? 'your' : 'its') + ' space.';
+  if (type === 'expand'){
+    if (w.owner) return { ok:false, reason:`Already claimed by ${w.owner === 'H' ? 'you' : 'the rival'}.` };
+    if (!adjacentToEmpire(w, emp)) return { ok:false, reason:noRoute };
+    const c = expandCost(emp);
+    if (E.credits < c) return { ok:false, reason:`Costs ${c}c — ${emp==='H'?'you have':'it has'} ${E.credits}c.` };
+    return { ok:true, costC:c, costM:0,
+      effect:`Claim ${w.name} (${num2(w.id)}) with E${w.e}·I${w.i}·D${w.d} intact.` };
+  }
+  if (type === 'develop'){
+    if (w.owner !== emp) return { ok:false, reason: emp==='H' ? 'Not one of your worlds.' : 'Not a rival world.' };
+    if (w[attr] >= 5) return { ok:false, reason:`${ATTR_NAMES[attr]} is already at level 5.` };
+    if (E.credits < CONFIG.DEVELOP_COST) return { ok:false, reason:`Costs 8c — you have ${E.credits}c.` };
+    return { ok:true, costC:CONFIG.DEVELOP_COST, costM:0,
+      effect:`${w.name} ${ATTR_NAMES[attr]} ${w[attr]} → ${w[attr] + 1}. Pays out from next turn.` };
+  }
+  if (type === 'attack'){
+    if (w.owner === emp) return { ok:false, reason: emp==='H' ? 'You already hold this world.' : 'Rival already holds this world.' };
+    if (!w.owner) return { ok:false, reason:'Unclaimed — use Expand.' };
+    if (!adjacentToEmpire(w, emp)) return { ok:false, reason:noRoute };
+    if (isProtected(w, turn))
+      return { ok:false, reason:`Capture-protected through turn ${w.protectedUntil} — attackable turn ${w.protectedUntil + 1}.` };
+    const m = attackMilCost(w, turn);
+    if (E.credits < CONFIG.ATTACK_CREDITS) return { ok:false, reason:`Costs 8c — you have ${E.credits}c.` };
+    if (E.military < m) return { ok:false, reason:`Costs 8c + ${m}m — you have ${E.military}m${blockadeOn(turn) ? ' (incl. +8m blockade)' : ''}.` };
+    return { ok:true, costC:CONFIG.ATTACK_CREDITS, costM:m,
+      effect:`Seize ${w.name} (${num2(w.id)}) from ${w.owner==='H'?'you':'the rival'} · protected through turn ${turn + 1}.` };
+  }
+  return { ok:false, reason:'Unknown order.' };
+}
+
+/* ---------- applying orders ---------- */
+function applyAction(emp, act){
+  const w = S.worlds[act.id];
+  if (act.type === 'expand'){
+    const cost = expandCost(emp);
+    S.emp[emp].credits -= cost;
+    w.owner = emp;
+    log(emp, `${emp==='H'?'You claim':'The rival claims'} ${w.name} (${num2(w.id)}) · ${cost}c`);
+  } else if (act.type === 'develop'){
+    S.emp[emp].credits -= CONFIG.DEVELOP_COST;
+    w[act.attr] += 1;
+    log(emp, `${emp==='H'?'You develop':'The rival develops'} ${ATTR_NAMES[act.attr]} on ${w.name} (${num2(w.id)}) · 8c`);
+  } else if (act.type === 'attack'){
+    const m = attackMilCost(w, S.turn);
+    S.emp[emp].credits -= CONFIG.ATTACK_CREDITS;
+    S.emp[emp].military -= m;
+    const victim = w.owner;
+    w.owner = emp;
+    w.protectedUntil = S.turn + 1;
+    log(emp, `${emp==='H'?'You seize':'The rival seizes'} ${w.name} (${num2(w.id)}) from ${victim==='H'?'you':'the rival'} · 8c + ${m}m${blockadeOn(S.turn) ? ' (blockade)' : ''}`);
+    if (owned(victim).length === 0){
+      S.emp[victim].alive = false;
+      gameOver(emp, 'elimination');
+    }
+  }
+}
+function log(who, text){
+  const cls = who === 'system' ? 'system' : who === 'prestige' ? 'prestige' : who.toLowerCase();
+  S.log.push({ turn: S.turn, cls, text });
+}
+
+/* ---------- turn engine ---------- */
+function startTurn(){
+  if (S.phase === 'over') return;
+  S.turn += 1;
+  const iH = incomeOf('H'), iA = incomeOf('A');
+  S.emp.H.credits += iH.credits; S.emp.H.military += iH.military;
+  S.emp.A.credits += iA.credits; S.emp.A.military += iA.military;
+  log('system', `Income — you +${iH.credits}c +${iH.military}m · rival +${iA.credits}c +${iA.military}m${S.turn === CONFIG.NO_MIL_TURN ? ' · supernova: no Military income' : ''}`);
+  render(); // show income + fresh turn before AI acts
+  if (S.turn % 2 === 0){
+    aiAct();
+    if (S.phase === 'over') return;
+  }
+  S.staged = { type: null, attr: S.staged.attr };
+  S.phase = 'human';
+  render();
+}
+function endHumanOrder(passed){
+  if (S.phase === 'over') return;
+  if (passed) log('H', 'You stand pat.');
+  if (S.turn % 2 === 1){ // odd turns: human first → rival answers
+    aiAct();
+    if (S.phase === 'over') return;
+  }
+  finishTurn();
+}
+function finishTurn(){
+  if (S.phase === 'over') return;
+  // scheduled events
+  if (S.turn === CONFIG.AWAKEN_TURN){
+    for (const id of CONFIG.RELAYS){
+      const w = S.worlds[id];
+      w.e = Math.min(5, w.e + 1); w.i = Math.min(5, w.i + 1);
+    }
+    log('system', 'The ancient relays awaken: +1 Economy, +1 Industry (cap 5).');
+  }
+  if (S.turn >= CONFIG.PRESTIGE_FROM && S.turn <= CONFIG.TURNS){
+    for (const id of CONFIG.RELAYS){
+      const w = S.worlds[id];
+      if (w.owner){
+        S.emp[w.owner].prestige += CONFIG.RELAY_PAYOUT;
+        log('prestige', `${w.owner==='H'?'You gain':'The rival gains'} 2 relay prestige (${w.name}).`);
+      }
+    }
+  }
+  if (S.turn === 10) log('system', 'Supernova warning: no Military income for either side on turn 11.');
+  if (S.turn === 15) log('system', 'Blockade warning: every attack costs +8 Military on turns 16–19.');
+  if (S.turn >= CONFIG.TURNS){
+    scoreAndEnd();
+    return;
+  }
+  startTurn();
+}
+function gameOver(winner, why){
+  S.phase = 'over';
+  S.result = { winner, why };
+  log('system', why === 'elimination'
+    ? `${winner==='H'?'Your':'The rival\u2019s'} enemies are cast out of the sector.`
+    : 'The galaxy collapses into memory.');
+  render();
+  showResult();
+}
+function scoreAndEnd(){
+  const h = totalPrestige('H'), a = totalPrestige('A');
+  const winner = h === a ? null : (h > a ? 'H' : 'A');
+  S.phase = 'over';
+  S.result = { winner, why: 'score' };
+  log('system', 'The stars go out. Final scoring:');
+  render();
+  showResult();
+}
+
+/* ---------- deterministic rival ---------- */
+function aiAction(){
+  const t = S.turn, A = 'A', H = 'H';
+  const tryAttack = w => legality(A, 'attack', w, null, t).ok ? { type:'attack', id:w.id } : null;
+  const tryExpand = w => legality(A, 'expand', w, null, t).ok ? { type:'expand', id:w.id } : null;
+  const tryDevelop = (w, attr) => (w[attr] < 5 && S.emp[A].credits >= CONFIG.DEVELOP_COST)
+    ? { type:'develop', id:w.id, attr } : null;
+
+  // 1. capture the human's final world
+  const hw = owned(H);
+  if (hw.length === 1){
+    const a = tryAttack(hw[0]);
+    if (a) return a;
+  }
+  // 2. relays: capture human-held, else expand onto neutral (lower ID first)
+  for (const id of CONFIG.RELAYS){
+    const w = S.worlds[id];
+    if (w.owner === H){ const a = tryAttack(w); if (a) return a; }
+  }
+  for (const id of CONFIG.RELAYS){
+    const w = S.worlds[id];
+    if (!w.owner){ const a = tryExpand(w); if (a) return a; }
+  }
+  // 3. defend an owned relay adjacent to the human
+  for (const id of CONFIG.RELAYS){
+    const w = S.worlds[id];
+    if (w.owner !== A) continue;
+    if (w.protectedUntil >= t + 1) continue; // still protected next turn
+    if (!NEIGH[w.id].some(n => S.worlds[n].owner === H)) continue;
+    if (w.d >= 5) continue;
+    const sur = blockadeOn(t + 1) ? CONFIG.BLOCKADE_SURCHARGE : 0;
+    const before = CONFIG.ATTACK_BASE + CONFIG.ATTACK_PER_DEF * w.d + sur;
+    const after  = CONFIG.ATTACK_BASE + CONFIG.ATTACK_PER_DEF * (w.d + 1) + sur;
+    if (S.emp[H].credits >= CONFIG.ATTACK_CREDITS &&
+        S.emp[H].military >= before && S.emp[H].military < after){
+      const a = tryDevelop(w, 'd');
+      if (a) return a;
+    }
+  }
+  // 4. capture highest-value legal non-relay enemy world
+  let best = null;
+  for (const w of S.worlds){
+    if (w.owner !== H || CONFIG.RELAYS.includes(w.id)) continue;
+    if (!adjacentToEmpire(w, A) || isProtected(w, t)) continue;
+    const m = attackMilCost(w, t);
+    if (S.emp[A].credits < CONFIG.ATTACK_CREDITS || S.emp[A].military < m) continue;
+    const value = 3 + w.e + w.i + w.d;
+    const better = !best
+      || value > best.value
+      || (value === best.value && (m < best.m || (m === best.m && w.id < best.id)));
+    if (better) best = { w, m, value };
+  }
+  if (best) return { type:'attack', id: best.w.id };
+  // 5. expansion: step toward a neutral relay not already adjacent to AI, else best neutral
+  const relayAdjacentToAI = id => NEIGH[id].some(n => S.worlds[n].owner === A);
+  const neutralAdj = S.worlds
+    .filter(w => !w.owner && adjacentToEmpire(w, A))
+    .sort((a, b) => a.id - b.id);
+  for (const r of CONFIG.RELAYS){
+    const rw = S.worlds[r];
+    if (rw.owner || relayAdjacentToAI(r)) continue;
+    for (const w of neutralAdj){
+      if (NEIGH[r].includes(w.id)){
+        const a = tryExpand(w);
+        if (a) return a;
+      }
+    }
+  }
+  if (neutralAdj.length){
+    const pick = neutralAdj.slice().sort((a, b) => {
+      const sa = a.e + a.i, sb = b.e + b.i;
+      if (sb !== sa) return sb - sa;
+      if (b.e !== a.e) return b.e - a.e;
+      return a.id - b.id;
+    })[0];
+    const a = tryExpand(pick);
+    if (a) return a;
+  }
+  // 6. development
+  if (t <= 16){
+    const income = incomeOf(A).credits;
+    let pref = income < 12 ? 'e' : 'i';
+    for (const attr of [pref, pref === 'e' ? 'i' : 'e']){
+      for (const w of owned(A)){
+        const a = tryDevelop(w, attr);
+        if (a) return a;
+      }
+    }
+  } else {
+    for (const id of CONFIG.RELAYS){ // fortify relay bordering the human
+      const w = S.worlds[id];
+      if (w.owner === A && NEIGH[w.id].some(n => S.worlds[n].owner === H)){
+        const a = tryDevelop(w, 'd');
+        if (a) return a;
+      }
+    }
+    for (const w of owned(A)){
+      for (const attr of ['e','i','d']){
+        const a = tryDevelop(w, attr);
+        if (a) return a;
+      }
+    }
+  }
+  return { type:'pass' };
+}
+function aiAct(){
+  const act = aiAction();
+  if (act.type === 'pass'){ log('A', 'The rival stands pat.'); }
+  else applyAction('A', act);
+  render();
+}
+
+/* ---------- rendering ---------- */
+const $ = id => document.getElementById(id);
+const mapSvg = $('map');
+
+// static starfield + nebula, built once
+(function paintStars(){
+  const g = $('stars');
+  const rs = mulberry32(20261025);
+  const NS = 'http://www.w3.org/2000/svg';
+  const neb = (cx, cy, rx, ry, col, op) => {
+    const e = document.createElementNS(NS,'ellipse');
+    e.setAttribute('cx',cx); e.setAttribute('cy',cy);
+    e.setAttribute('rx',rx); e.setAttribute('ry',ry);
+    e.setAttribute('fill',col); e.setAttribute('opacity',op);
+    e.setAttribute('filter','blur(38px)');
+    g.appendChild(e);
+  };
+  neb(250,180,220,140,'rgba(64,96,170,.16)');
+  neb(720,520,260,160,'rgba(170,84,64,.12)');
+  neb(500,330,300,180,'rgba(217,169,78,.05)');
+  for (let i = 0; i < 150; i++){
+    const c = document.createElementNS(NS,'circle');
+    const r = rs();
+    c.setAttribute('cx',(rs()*960).toFixed(1));
+    c.setAttribute('cy',(rs()*720).toFixed(1));
+    c.setAttribute('r',(0.4 + r*r*1.7).toFixed(2));
+    c.setAttribute('class', r > .93 ? 'star warm' : r > .6 ? 'star' : 'star faint');
+    const op = .25 + r * .65;
+    c.setAttribute('opacity', op.toFixed(2));
+    g.appendChild(c);
+  }
+})();
+
+// lanes
+(function paintLanes(){
+  const g = $('lanes');
+  const NS = 'http://www.w3.org/2000/svg';
+  for (const [a,b] of LINKS){
+    const l = document.createElementNS(NS,'line');
+    l.setAttribute('x1',POS[a].x); l.setAttribute('y1',POS[a].y);
+    l.setAttribute('x2',POS[b].x); l.setAttribute('y2',POS[b].y);
+    l.setAttribute('class','lane');
+    l.dataset.a = a; l.dataset.b = b;
+    g.appendChild(l);
+  }
+})();
+
+// world nodes
+const worldNodes = [];
+(function paintWorlds(){
+  const g = $('worlds');
+  const NS = 'http://www.w3.org/2000/svg';
+  S_WORLDS:
+  for (let id = 0; id < 20; id++){
+    const { x, y } = POS[id];
+    const node = document.createElementNS(NS,'g');
+    node.setAttribute('class','world');
+    node.setAttribute('tabindex','0');
+    node.setAttribute('role','button');
+    node.setAttribute('transform',`translate(${x},${y})`);
+    node.dataset.id = id;
+    node.setAttribute('aria-label',`${WORLD_NAMES[id]} ${num2(id)}`);
+
+    const halo = document.createElementNS(NS,'circle');
+    halo.setAttribute('r','30'); halo.setAttribute('class','halo');
+    node.appendChild(halo);
+
+    if (CONFIG.RELAYS.includes(id)){
+      const ring = document.createElementNS(NS,'circle');
+      ring.setAttribute('r','29.5'); ring.setAttribute('class','relay-ring');
+      node.appendChild(ring);
+    }
+    const sel = document.createElementNS(NS,'circle');
+    sel.setAttribute('r','26'); sel.setAttribute('class','sel-ring');
+    node.appendChild(sel);
+
+    const body = document.createElementNS(NS,'circle');
+    body.setAttribute('r','20'); body.setAttribute('class','body');
+    node.appendChild(body);
+    const rim = document.createElementNS(NS,'circle');
+    rim.setAttribute('r','20'); rim.setAttribute('class','rim');
+    node.appendChild(rim);
+
+    if (id === CONFIG.HOME_H || id === CONFIG.HOME_A){
+      const m = document.createElementNS(NS,'path');
+      m.setAttribute('d','M0,-33 L4,-27 L0,-21 L-4,-27 Z');
+      m.setAttribute('class','home-mark');
+      node.appendChild(m);
+    }
+    const protBg = document.createElementNS(NS,'circle');
+    protBg.setAttribute('cx','16'); protBg.setAttribute('cy','-16'); protBg.setAttribute('r','7.5');
+    protBg.setAttribute('class','prot-bg'); protBg.setAttribute('fill','#ffb1a0');
+    node.appendChild(protBg);
+    const prot = document.createElementNS(NS,'text');
+    prot.setAttribute('x','16'); prot.setAttribute('y','-13'); prot.setAttribute('class','prot');
+    prot.textContent = '✕';
+    node.appendChild(prot);
+
+    const num = document.createElementNS(NS,'text');
+    num.setAttribute('y','4'); num.setAttribute('class','num');
+    num.textContent = num2(id);
+    node.appendChild(num);
+
+    const name = document.createElementNS(NS,'text');
+    name.setAttribute('y','36'); name.setAttribute('class','wname');
+    name.textContent = WORLD_NAMES[id];
+    node.appendChild(name);
+
+    const pips = document.createElementNS(NS,'g');
+    pips.setAttribute('class','pips');
+    pips.setAttribute('transform','translate(-13,44)');
+    const cols = { e:0, i:1, d:2 };
+    const colX = { e:'#e8c98d', i:'#c9a1ff', d:'#7fb4ff' };
+    for (const attr of ['e','i','d']){
+      const grp = document.createElementNS(NS,'g');
+      const off = document.createElementNS(NS,'text');
+      off.setAttribute('x', cols[attr]*14); off.setAttribute('y','4');
+      off.setAttribute('fill', colX[attr]); off.setAttribute('opacity','.55');
+      off.setAttribute('font-size','7'); off.setAttribute('text-anchor','middle');
+      off.setAttribute('font-family','Inter');
+      off.textContent = attr.toUpperCase();
+      grp.appendChild(off);
+      for (let k = 1; k <= 5; k++){
+        const p = document.createElementNS(NS,'circle');
+        p.setAttribute('cx', cols[attr]*14);
+        p.setAttribute('cy', 8);
+        p.setAttribute('r', 1.4);
+        p.setAttribute('fill', colX[attr]);
+        p.setAttribute('opacity', 0);
+        p.dataset.pip = `${id}:${attr}:${k}`;
+        grp.appendChild(p);
+      }
+      pips.appendChild(grp);
+    }
+    node.appendChild(pips);
+
+    node.addEventListener('click', () => selectWorld(id));
+    node.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectWorld(id); }
+    });
+    g.appendChild(node);
+    worldNodes.push(node);
+  }
+})();
+
+function selectWorld(id){
+  S.selected = id;
+  render();
+}
+
+function humanStagedLegality(){
+  if (!S.staged.type) return null;
+  if (S.selected == null) return { ok:false, reason:'Select a world on the map.' };
+  return legality('H', S.staged.type, S.worlds[S.selected], S.staged.attr, S.turn);
+}
+
+function render(){
+  if (!S) return;
+  const humanTurn = S.phase === 'human';
+  // hud
+  $('hudTurn').textContent = S.phase === 'over' ? 20 : S.turn;
+  $('hudInit').innerHTML = S.phase === 'over'
+    ? '<b>finished</b>'
+    : (S.turn % 2 === 1 ? '<b>You</b> have initiative' : '<b>Rival</b> has initiative');
+  document.querySelectorAll('.world').forEach((n,i)=>{
+    const w = S.worlds[i];
+    n.setAttribute('class','world'
+      + (w.owner ? ` owner-${w.owner === 'H' ? 'h' : 'a'}` : ' owner-n')
+      + (CONFIG.RELAYS.includes(i) ? ' relay' : '')
+      + (S.selected === i ? ' selected' : '')
+      + (S.phase === 'human' && S.staged.type && humanStagedIsLegalFor(i) ? ' legal' : '')
+      + (S.phase === 'human' && S.staged.type && humanStagedIsLegalFor(i) && S.staged.type !== 'develop' ? ' staged' : '')
+      + (isProtected(w, S.turn) ? ' protected' : ''));
+    const act = S.staged.type;
+    n.querySelector('.halo').classList.toggle('action-attack', act === 'attack');
+    n.querySelector('.halo').classList.toggle('action-expand', act === 'expand');
+    n.querySelector('.halo').classList.toggle('action-develop', act === 'develop');
+  });
+  // staged marker ring: show solid white ring on the selected target while a legal order is staged
+  const selNode = S.selected != null ? worldNodes[S.selected] : null;
+  worldNodes.forEach(n => n.classList.remove('staged'));
+  if (selNode && humanTurn && S.staged.type && humanStagedLegality()?.ok) selNode.classList.add('staged');
+
+  // lanes touched by selection
+  document.querySelectorAll('.lane').forEach(l => {
+    l.classList.toggle('touched', S.selected != null && (l.dataset.a == S.selected || l.dataset.b == S.selected));
+  });
+  // pips
+  document.querySelectorAll('[data-pip]').forEach(p => {
+    const [id, attr, k] = p.dataset.pip.split(':');
+    p.setAttribute('opacity', S.worlds[+id][attr] >= +k ? '0.9' : '0.18');
+  });
+  // empire cards
+  renderEmp('H'); renderEmp('A');
+  // forecast
+  renderForecast();
+  // inspector
+  renderInspector();
+  // composer
+  renderComposer();
+  // log
+  renderLog();
+}
+function humanStagedIsLegalFor(id){
+  if (S.phase !== 'human' || !S.staged.type) return false;
+  return legality('H', S.staged.type, S.worlds[id], S.staged.attr, S.turn).ok;
+}
+function renderEmp(emp){
+  const E = S.emp[emp], el = $(emp === 'H' ? 'empH' : 'empA');
+  const inc = incomeOf(emp);
+  el.classList.toggle('dead', !E.alive);
+  el.innerHTML = `
+    <div class="who"><i></i><span>${emp === 'H' ? 'Your Empire · Nadir' : 'Rival · Vulcan'}</span></div>
+    <div class="stats">
+      <div><label>Credits</label><b>${E.credits}</b></div>
+      <div><label>Military</label><b>${E.military}</b></div>
+      <div><label>Income / turn</label><b>+${inc.credits}c +${inc.military}m</b></div>
+      <div><label>Worlds</label><b>${owned(emp).length}</b></div>
+    </div>
+    <div class="prest"><span>Prestige</span><span><b>${totalPrestige(emp)}</b> <small>(planet ${planetValue(emp)} · relays ${E.prestige})</small></span></div>`;
+}
+function renderForecast(){
+  const t = S.turn, f = $('forecast');
+  let tag, text;
+  if (t < 5){ tag = ['next','Forecast']; text = `<b>End of turn 5</b> — the relays awaken: +1 Economy &amp; Industry (cap 5). First <b>2 prestige</b> to each holder.`; }
+  else if (t === 5){ tag = ['now','Active this turn']; text = `<b>End of this turn</b> — relays awaken (+1 Eco &amp; Ind) and pay <b>2 prestige</b> per held relay.`; }
+  else if (t < 11){ tag = ['next','Forecast']; text = `<b>Turn 11</b> — supernova: <b>no Military income</b> for either side. Credits unaffected.`; }
+  else if (t === 11){ tag = ['now','Active this turn']; text = `<b>Supernova</b> — Military income suppressed. Credits and stockpiled Military unaffected.`; }
+  else if (t < 16){ tag = ['next','Forecast']; text = `<b>Turns 16–19</b> — blockade: every attack costs <b>+8 Military</b>.`; }
+  else if (t <= 19){ tag = ['now','Active this turn']; text = `<b>Blockade</b> — every attack costs <b>+8 Military</b>. Lifts before turn-20 orders.`; }
+  else { tag = ['now','Active this turn']; text = `<b>Turn 20</b> — final relay prestige, then the galaxy is scored.`; }
+  f.innerHTML = `<span class="fc-tag ${tag[0]}">${tag[1]}</span><br>${text}`;
+}
+function renderInspector(){
+  const el = $('inspector');
+  if (S.selected == null){
+    el.innerHTML = `<p style="color:var(--muted);font-size:.85rem">Select any world on the chart to inspect it.</p>`;
+    return;
+  }
+  const w = S.worlds[S.selected];
+  const ownTxt = w.owner ? (w.owner === 'H' ? 'Yours' : 'The rival\u2019s') : 'Unclaimed';
+  const inc = w.owner ? `+${2*w.e}c +${w.i}m per turn` : 'no income while unclaimed';
+  const atk = w.owner === 'A' && !isProtected(w, S.turn)
+    ? `An attack here costs 8c + ${attackMilCost(w, S.turn)}m${blockadeOn(S.turn) ? ' (incl. +8m blockade)' : ''}.`
+    : null;
+  const pro = isProtected(w, S.turn)
+    ? `<p class="protnote">Capture-protected through turn ${w.protectedUntil} — attackable turn ${w.protectedUntil + 1}.</p>` : '';
+  el.innerHTML = `
+    <div class="inspect-title"><span class="nm">${w.name}</span><span class="no">World ${num2(w.id)}</span></div>
+    <div class="badges">
+      <span class="badge ${w.owner === 'H' ? 'you' : w.owner === 'A' ? 'rival' : 'neutral'}">${ownTxt}</span>
+      <span class="badge">${w.label}</span>
+      ${CONFIG.RELAYS.includes(w.id) ? '<span class="badge relay">Ancient relay</span>' : ''}
+      ${(w.id === CONFIG.HOME_H || w.id === CONFIG.HOME_A) ? `<span class="badge ${w.id === CONFIG.HOME_H ? 'you' : 'rival'}">Homeworld</span>` : ''}
+      ${isProtected(w, S.turn) ? '<span class="badge protected">Protected</span>' : ''}
+    </div>
+    <div class="attr-row">
+      <div class="attr e"><label>Economy</label><b>${w.e}</b></div>
+      <div class="attr i"><label>Industry</label><b>${w.i}</b></div>
+      <div class="attr d"><label>Defense</label><b>${w.d}</b></div>
+    </div>
+    <p class="prod-line">Production: <b>${inc}</b></p>
+    ${atk ? `<p class="prod-line" style="margin-top:4px">${atk}</p>` : ''}
+    ${!w.owner && adjacentToEmpire(w, 'H') ? `<p class="prod-line" style="margin-top:4px">Expand cost from your ${owned('H').length} world${owned('H').length === 1 ? '' : 's'}: <b>${expandCost('H')}c</b></p>` : ''}
+    ${pro}`;
+}
+function renderComposer(){
+  const humanTurn = S.phase === 'human';
+  const t = S.staged.type;
+  $('tabExpand').classList.toggle('active', t === 'expand');
+  $('tabDevelop').classList.toggle('active', t === 'develop');
+  $('tabAttack').classList.toggle('active', t === 'attack');
+  $('attrPicker').classList.toggle('show', t === 'develop');
+  document.querySelectorAll('.attr-btn').forEach(b =>
+    b.classList.toggle('active', t === 'develop' && b.dataset.attr === S.staged.attr));
+
+  const pv = $('preview'), commit = $('commitBtn'), pass = $('passBtn');
+  pass.disabled = !humanTurn;
+  if (!humanTurn){
+    pv.className = 'preview';
+    pv.innerHTML = S.result
+      ? (S.result.why === 'elimination' ? 'The campaign has ended.' : 'The galaxy has been scored.')
+      : 'Awaiting the rival\u2019s move…';
+    commit.disabled = true;
+    return;
+  }
+  if (!t){
+    pv.className = 'preview';
+    pv.innerHTML = 'Choose an order — or select a world first. Nothing is spent until you commit.';
+    commit.disabled = true;
+    return;
+  }
+  const leg = humanStagedLegality();
+  commit.disabled = !(leg && leg.ok);
+  if (!leg) return;
+  if (!leg.ok){
+    pv.className = 'preview bad';
+    pv.innerHTML = `<b>${cap(t)}:</b> ${leg.reason}`;
+    return;
+  }
+  const w = S.worlds[S.selected];
+  pv.className = 'preview ok';
+  const label = t === 'develop' ? `Develop · ${ATTR_NAMES[S.staged.attr]}` : cap(t);
+  pv.innerHTML = `<b>${label} — ${w.name} (${num2(w.id)})</b>
+    <div class="cost"><span>Cost <b>${leg.costC}c${leg.costM ? ` + ${leg.costM}m` : ''}</b></span>
+    <span>You hold <b>${S.emp.H.credits}c ${S.emp.H.military}m</b></span></div>
+    <div class="effect">${leg.effect}</div>`;
+}
+const cap = s => s[0].toUpperCase() + s.slice(1);
+
+function renderLog(){
+  const ol = $('logList');
+  const atBottom = ol.scrollHeight - ol.scrollTop - ol.clientHeight < 40;
+  ol.innerHTML = S.log.slice(-80).map(e =>
+    `<li class="${e.cls}"><span class="t">T${String(e.turn).padStart(2,'0')}</span><span>${e.text}</span></li>`).join('');
+  if (atBottom) ol.scrollTop = ol.scrollHeight;
+}
+
+/* ---------- result ---------- */
+function showResult(){
+  const r = S.result;
+  const you = totalPrestige('H'), riv = totalPrestige('A');
+  const title = $('resultTitle'), why = $('resultWhy');
+  if (r.why === 'elimination'){
+    if (r.winner === 'H'){ title.textContent = 'The Sector Is Yours'; title.style.color = 'var(--human)'; }
+    else { title.textContent = 'Your Star Goes Dark'; title.style.color = 'var(--rival)'; }
+    why.textContent = r.winner === 'H'
+      ? 'The rival holds no worlds — victory by conquest.'
+      : 'You hold no worlds — defeat by conquest.';
+  } else {
+    if (r.winner === null){ title.textContent = 'A Quiet Draw'; title.style.color = 'var(--gold)'; why.textContent = 'Both empires finish with equal prestige.'; }
+    else if (r.winner === 'H'){ title.textContent = 'Prestige Prevails'; title.style.color = 'var(--human)'; why.textContent = `Your ${you} prestige beats the rival's ${riv} after twenty turns.`; }
+    else { title.textContent = 'The Rival Prevails'; title.style.color = 'var(--rival)'; why.textContent = `Rival prestige ${riv} beats your ${you} after twenty turns.`; }
+  }
+  $('scoreTable').innerHTML = `
+    <tr><th></th><th>Worlds</th><th>Planet value</th><th>Relay prestige</th><th>Total</th></tr>
+    <tr><td class="you">Your empire</td><td>${owned('H').length}</td><td>${planetValue('H')}</td><td>${S.emp.H.prestige}</td><td class="you">${you}</td></tr>
+    <tr><td class="riv">Rival</td><td>${owned('A').length}</td><td>${planetValue('A')}</td><td>${S.emp.A.prestige}</td><td class="riv">${riv}</td></tr>
+    <tr class="total"><td>Credits &amp; Military do not score</td><td></td><td></td><td></td><td>${you} : ${riv}</td></tr>`;
+  $('resultSeed').textContent = `SECTOR SEED · ${S.seed}`;
+  $('result').hidden = false;
+}
+
+/* ---------- wiring ---------- */
+$('tabExpand').addEventListener('click', () => stageType('expand'));
+$('tabDevelop').addEventListener('click', () => stageType('develop'));
+$('tabAttack').addEventListener('click', () => stageType('attack'));
+function stageType(t){
+  if (S.phase !== 'human') return;
+  S.staged.type = S.staged.type === t ? null : t;
+  render();
+}
+document.querySelectorAll('.attr-btn').forEach(b =>
+  b.addEventListener('click', () => { S.staged.attr = b.dataset.attr; render(); }));
+
+$('commitBtn').addEventListener('click', () => {
+  if (S.phase !== 'human') return;
+  const leg = humanStagedLegality();
+  if (!leg || !leg.ok) return;
+  applyAction('H', { type: S.staged.type, id: S.selected, attr: S.staged.attr });
+  S.staged.type = null;
+  render();
+  endHumanOrder(false);
+});
+$('passBtn').addEventListener('click', () => {
+  if (S.phase !== 'human') return;
+  S.staged.type = null;
+  endHumanOrder(true);
+});
+$('helpBtn').addEventListener('click', () => { $('intro').hidden = false; });
+$('startBtn').addEventListener('click', () => { $('intro').hidden = true; if (!S) newMatch(randomSeed()); });
+$('newGalaxyBtn').addEventListener('click', () => { $('result').hidden = true; newMatch(randomSeed()); });
+$('replayBtn').addEventListener('click', () => { $('result').hidden = true; newMatch(S.seed); });
+document.addEventListener('keydown', e => {
+  if (!S || S.phase !== 'human') return;
+  if (e.target.closest('button,[role=button],input')) return;
+  if (e.key === '1') stageType('expand');
+  else if (e.key === '2') stageType('develop');
+  else if (e.key === '3') stageType('attack');
+  else if (e.key.toLowerCase() === 'p') $('passBtn').click();
+});
+function randomSeed(){ return (Math.random() * 0xFFFFFFFF) >>> 0; }
+
+/* boot: build galaxy preview behind intro, start on Begin */
+newMatch(randomSeed());
+</script>
+</body>
+</html>
