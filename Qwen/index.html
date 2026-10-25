@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Relic Wars — a blitz duel for twenty worlds</title>
+<meta name="description" content="Lead the Lucent Accord against a deterministic rival across twenty worlds. Claim the ancient Vigil relays before the galaxy collapses.">
+<meta name="theme-color" content="#07050f">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='7' fill='%23ffc94d'/%3E%3Cellipse cx='16' cy='16' rx='14' ry='5' fill='none' stroke='%233ddc97' stroke-width='2' transform='rotate(-20 16 16)'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<canvas id="sky" aria-hidden="true"></canvas>
+<div class="vignette" aria-hidden="true"></div>
+
+<!-- icon symbols -->
+<svg id="icons" style="display:none" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 16 16"><path d="M8 1.6 14.6 7H12v7H4V7H1.4z" fill="currentColor"/></symbol>
+  <symbol id="i-relay" viewBox="0 0 16 16"><path d="M8 0.8 15.2 8 8 15.2 0.8 8z" fill="currentColor"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 16 16"><path d="M8 1 14 3.4v4.2c0 3.6-2.5 6.2-6 7.4-3.5-1.2-6-3.8-6-7.4V3.4z" fill="currentColor"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 16 16"><path d="M6.6 1.6h2.8v5h5v2.8h-5v5H6.6v-5h-5V6.6h5z" fill="currentColor"/></symbol>
+  <symbol id="i-sword" viewBox="0 0 16 16"><path d="M13.4 1.2 15 2.8 6.6 11.2l-1.6-1.6zM4.2 10.4l1.4 1.4-3 3a1 1 0 0 1-1.4-1.4zM5.6 11.8l1.4 1.4-1 1-1.4-1.4z" fill="currentColor"/></symbol>
+  <symbol id="i-up" viewBox="0 0 16 16"><path d="M8 1.8 14.6 13H1.4z" fill="currentColor"/></symbol>
+  <symbol id="i-credit" viewBox="0 0 16 16"><path d="M8 1 14 8l-6 7-6-7zm0 3.4L4.9 8 8 11.6 11.1 8z" fill="currentColor"/></symbol>
+  <symbol id="i-mil" viewBox="0 0 16 16"><path d="M8 1.2 13.6 6 8 14.8 2.4 6zm0 3L5.6 6.6 8 10.6l2.4-4z" fill="currentColor"/></symbol>
+  <symbol id="i-spark" viewBox="0 0 16 16"><path d="M8 0.5 9.8 6.2 15.5 8 9.8 9.8 8 15.5 6.2 9.8 0.5 8 6.2 6.2z" fill="currentColor"/></symbol>
+  <symbol id="i-sound" viewBox="0 0 16 16"><path d="M8 1.5 4.5 5H1.8v6h2.7L8 14.5zM11 5.2a4 4 0 0 1 0 5.6l1 1a5.5 5.5 0 0 0 0-7.6z" fill="currentColor"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 16 16"><path d="M8 1.5 4.5 5H1.8v6h2.7L8 14.5zM11.2 6.2l3.6 3.6-1 1-3.6-3.6-3.6 3.6-1-1 3.6-3.6-3.6-3.6 1-1 3.6 3.6z" fill="currentColor"/></symbol>
+  <symbol id="i-q" viewBox="0 0 16 16"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1m.2 10.9H6.6v-1.5h1.6zm1.4-4.6-.7.8c-.6.6-.8 1-.8 1.9H6.4v-.4c0-.9.3-1.6 1-2.2l.9-1c.3-.3.4-.6.4-1a1.2 1.2 0 0 0-2.4 0H4.6a2.9 2.9 0 0 1 5.8 0c0 .7-.3 1.4-.8 1.9" fill="currentColor"/></symbol>
+  <symbol id="i-restart" viewBox="0 0 16 16"><path d="M8 2a6 6 0 1 0 5.7 4.2l-1.5.5A4.5 4.5 0 1 1 8 3.5V6l3.5-2.8L8 .4z" fill="currentColor"/></symbol>
+  <symbol id="i-dice" viewBox="0 0 16 16"><path d="M2.5 2.5h11v11h-11zM5 4a1 1 0 1 0 0 2 1 1 0 0 0 0-2m6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2M8 7a1 1 0 1 0 0 2 1 1 0 0 0 0-2M5 10a1 1 0 1 0 0 2 1 1 0 0 0 0-2m6 0a1 1 0 1 0 0 2 1 1 0 0 0 0-2" fill="currentColor" fill-rule="evenodd"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 16 16"><path d="M9.5 0.8 3 9.2h3.7L6.2 15.2 13 6.4H9z" fill="currentColor"/></symbol>
+</svg>
+
+<div id="app">
+
+  <!-- ============================ HUD ============================ -->
+  <header id="hud">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+        <ellipse cx="20" cy="20" rx="17" ry="6.5" fill="none" stroke="rgba(61,220,151,.8)" stroke-width="1.6" transform="rotate(-24 20 20)"/>
+        <ellipse cx="20" cy="20" rx="17" ry="6.5" fill="none" stroke="rgba(177,140,255,.8)" stroke-width="1.6" transform="rotate(38 20 20)"/>
+        <circle cx="20" cy="20" r="5" fill="#ffc94d"/>
+        <circle cx="20" cy="20" r="8.5" fill="none" stroke="rgba(255,201,77,.35)" stroke-width="1"/>
+      </svg>
+      <div class="brandtext">
+        <h1>RELIC WARS</h1>
+        <p>a blitz duel for twenty worlds</p>
+      </div>
+    </div>
+
+    <div class="turnbox">
+      <div class="turnline">
+        <span id="turnNum" class="mono">TURN 1</span><span class="of mono">/20</span>
+        <span id="initChip" class="chip tiny" title="Odd turns: you act first. Even turns: the rival acts first."></span>
+      </div>
+      <div id="turnTrack" class="track" aria-hidden="true"></div>
+      <div id="phaseLine" class="phase"><span class="dot"></span><span id="phaseText">Standing by</span></div>
+    </div>
+
+    <div class="hudright">
+      <div id="badges" class="badges"></div>
+      <div class="hudbtns">
+        <span id="seedChip" class="chip tiny" title="Galaxy seed — same seed builds the same map">SEED —</span>
+        <button id="soundBtn" class="iconbtn" title="Toggle sound" aria-label="Toggle sound"><svg><use href="#i-sound"/></svg></button>
+        <button id="rulesBtn" class="iconbtn" title="Rules &amp; reference (?)" aria-label="Rules"><svg><use href="#i-q"/></svg></button>
+        <button id="restartBtn" class="iconbtn" title="Restart this galaxy (same seed)" aria-label="Restart match"><svg><use href="#i-restart"/></svg></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================ MAIN ============================ -->
+  <main id="main">
+
+    <aside id="railLeft" class="rail">
+      <section class="panel emp-panel" id="cardHuman" aria-label="Your empire"></section>
+      <section class="panel emp-panel" id="cardAI" aria-label="Rival empire"></section>
+      <section class="panel" id="panelMatch">
+        <div class="sec-head">Match status</div>
+        <div id="matchInfo" class="matchinfo"></div>
+      </section>
+    </aside>
+
+    <section id="stage" aria-label="Galaxy chart">
+      <div id="stageWrap">
+        <div id="mapframe">
+          <div class="mapbg" aria-hidden="true"></div>
+          <i class="corner tl" aria-hidden="true"></i><i class="corner tr" aria-hidden="true"></i>
+          <i class="corner bl" aria-hidden="true"></i><i class="corner br" aria-hidden="true"></i>
+          <svg id="lanes" viewBox="0 0 1000 640" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+            <defs id="laneDefs"></defs>
+            <g id="laneGlowG"></g>
+            <g id="laneG"></g>
+          </svg>
+          <div id="nodes" role="group" aria-label="Worlds of the galaxy"></div>
+          <div id="mapfx" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div id="banner" class="banner" aria-hidden="true"></div>
+    </section>
+
+    <aside id="railRight" class="rail">
+      <section class="panel" id="panelInspect" aria-label="World inspector"></section>
+      <section class="panel" id="panelOrders" aria-label="Order composer"></section>
+      <section class="panel" id="panelEvents" aria-label="Scheduled events">
+        <div class="sec-head">Celestial timeline</div>
+        <div id="nextEvent" class="nextcard"></div>
+        <div id="eventList" class="tl"></div>
+      </section>
+      <section class="panel" id="panelLog" aria-label="Action log">
+        <div class="sec-head">Comms log</div>
+        <div id="logList" class="loglist" role="log" aria-live="polite"></div>
+      </section>
+    </aside>
+  </main>
+
+  <!-- ======================= MOBILE ACTION BAR ======================= -->
+  <div id="actionbar" class="hidden">
+    <div id="abSummary" class="ab-sum">Select a world</div>
+    <button id="abPass" class="btn ghost" data-act="pass">Pass</button>
+    <button id="abCommit" class="btn commit" data-act="commit" disabled>Commit</button>
+  </div>
+
+  <div id="srLive" class="sr-only" aria-live="polite"></div>
+</div>
+
+<!-- ============================ INTRO ============================ -->
+<div id="intro" class="overlay">
+  <div class="ovcard intro-card">
+    <svg class="intro-orb" viewBox="0 0 120 120" aria-hidden="true">
+      <circle cx="60" cy="60" r="14" fill="#ffc94d"/>
+      <circle cx="60" cy="60" r="20" fill="none" stroke="rgba(255,201,77,.4)"/>
+      <ellipse cx="60" cy="60" rx="52" ry="19" fill="none" stroke="rgba(61,220,151,.7)" stroke-width="1.6" transform="rotate(-22 60 60)"/>
+      <ellipse cx="60" cy="60" rx="52" ry="19" fill="none" stroke="rgba(177,140,255,.7)" stroke-width="1.6" transform="rotate(40 60 60)"/>
+      <circle cx="103" cy="42" r="4.5" fill="#3ddc97"/>
+      <circle cx="21" cy="82" r="4.5" fill="#b18cff"/>
+    </svg>
+    <h2 class="title-glow">RELIC WARS</h2>
+    <p class="intro-sub">Twenty worlds. One rival. Sixteen chances to bank the ancient relays — before the galaxy collapses on turn 20.</p>
+
+    <div class="intro-steps">
+      <div class="step"><span class="stepnum">1</span><div><b>Select a world</b><p>Every lane, level and reserve is public. Selecting spends nothing.</p></div></div>
+      <div class="step"><span class="stepnum">2</span><div><b>Choose an order</b><p><span class="k-you">Expand</span> to claim, <span class="k-you">Develop</span> to improve, <span class="k-foe">Attack</span> to conquer. Exact prices shown before you commit.</p></div></div>
+      <div class="step"><span class="stepnum">3</span><div><b>Commit or Pass</b><p>One order per turn. The rival answers with its own — deterministic, never random.</p></div></div>
+    </div>
+
+    <div class="intro-relay">
+      <svg aria-hidden="true"><use href="#i-relay"/></svg>
+      <p><b>The Vigil relays (08 &amp; 13)</b> awaken at the end of turn 5. From then on, each relay pays its owner <b>+2 prestige every turn</b> through turn 20 — held prestige is kept even if the relay is lost. Final prestige decides the match… unless one empire is eliminated first.</p>
+    </div>
+
+    <div class="seedrow">
+      <label for="seedInput">Galaxy seed</label>
+      <input id="seedInput" class="mono" inputmode="numeric" maxlength="10" aria-describedby="seedHint">
+      <button id="seedDice" class="btn ghost sm" title="Randomize seed"><svg><use href="#i-dice"/></svg></button>
+      <span id="seedHint" class="hint">Same seed + same orders = same match.</span>
+    </div>
+
+    <button id="launchBtn" class="btn primary big">Launch match</button>
+    <p class="intro-keys">Keys: <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> stage order · <kbd>Enter</kbd> commit · <kbd>P</kbd> pass · <kbd>?</kbd> rules</p>
+  </div>
+</div>
+
+<!-- ============================ RESULT ============================ -->
+<div id="result" class="overlay hidden" aria-hidden="true">
+  <div class="ovcard result-card">
+    <p id="resKicker" class="res-kicker"></p>
+    <h2 id="resTitle" class="title-glow"></h2>
+    <p id="resReason" class="res-reason"></p>
+    <div id="resTable" class="res-table"></div>
+    <p id="resSeed" class="mono res-seed"></p>
+    <div class="res-btns">
+      <button class="btn primary" data-act="new-galaxy"><svg><use href="#i-spark"/></svg> New Galaxy</button>
+      <button class="btn ghost" data-act="replay"><svg><use href="#i-restart"/></svg> Replay Seed</button>
+      <button class="btn ghost sm" data-act="rules">Rules</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================ RULES ============================ -->
+<div id="rulesModal" class="overlay hidden" aria-hidden="true">
+  <div class="ovcard rules-card">
+    <button class="ovclose" data-act="close-rules" aria-label="Close rules">✕</button>
+    <h2>Field manual</h2>
+    <div id="rulesBody" class="rules-body"></div>
+  </div>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/sky.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>

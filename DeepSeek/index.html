@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#04070e" />
+  <meta name="description" content="Void Empires: Blitz — a twenty-turn duel for a twenty-world sector." />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23070e1b'/%3E%3Cpath d='M16 5l2.6 8.4L27 16l-8.4 2.6L16 27l-2.6-8.4L5 16l8.4-2.6L16 5z' fill='none' stroke='%2348e6ff' stroke-width='1.6'/%3E%3C/svg%3E" />
+  <title>Void Empires — Blitz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <canvas id="starfield" aria-hidden="true"></canvas>
+  <div class="ambient" aria-hidden="true"></div>
+
+  <svg class="svg-sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-star" viewBox="0 0 24 24">
+      <path d="M12 2.2l2.35 7.45L22 12l-7.65 2.35L12 21.8l-2.35-7.45L2 12l7.65-2.35L12 2.2z" />
+      <circle cx="12" cy="12" r="1.7" />
+    </symbol>
+    <symbol id="i-credit" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.2" />
+      <path d="M14.8 8.6c-.8-.6-1.7-.9-2.8-.9-2.2 0-3.8 1.7-3.8 4.3s1.6 4.3 3.8 4.3c1.2 0 2.2-.4 3-1.2" />
+      <path d="M8.8 10.3h4.5M8.8 13.6h4.5" />
+    </symbol>
+    <symbol id="i-military" viewBox="0 0 24 24">
+      <path d="M12 2.8l7.6 17.1-7.6-4.2-7.6 4.2L12 2.8z" />
+      <path d="M12 7.5v8.2" />
+    </symbol>
+    <symbol id="i-worlds" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="4.1" />
+      <ellipse cx="12" cy="12" rx="9.4" ry="3.9" transform="rotate(-25 12 12)" />
+    </symbol>
+    <symbol id="i-prestige" viewBox="0 0 24 24">
+      <path d="M12 2.8l2.8 5.7 6.3.9-4.6 4.5 1.1 6.3-5.6-3-5.6 3 1.1-6.3L3 9.4l6.2-.9L12 2.8z" />
+    </symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24">
+      <path d="M12 2.8l8 4.6v9.2l-8 4.6-8-4.6V7.4l8-4.6z" />
+      <path d="M12 8v8M8 12h8" />
+    </symbol>
+    <symbol id="i-develop" viewBox="0 0 24 24">
+      <path d="M4 20h16" />
+      <path d="M6.5 16v-4M12 16V7.5M17.5 16V4.8" />
+      <path d="M4.8 9.3L12 3l7.2 6.3" />
+    </symbol>
+    <symbol id="i-attack" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="7.2" />
+      <circle cx="12" cy="12" r="2.1" />
+      <path d="M12 1.8v4.1M12 18.1v4.1M1.8 12h4.1M18.1 12h4.1" />
+    </symbol>
+    <symbol id="i-help" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.6" />
+      <path d="M9.5 9.2c.2-1.5 1.3-2.4 2.8-2.4 1.6 0 2.7 1 2.7 2.4 0 1.7-1.7 2.2-2.3 3.2-.3.5-.4.9-.4 1.6" />
+      <circle cx="12.2" cy="17.1" r=".9" class="fill" />
+    </symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24">
+      <path d="M20 12a8 8 0 1 1-2.6-5.9" />
+      <path d="M20 3.8v5h-5" />
+    </symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24">
+      <path d="M12 2.6l7.2 2.7v6c0 4.5-2.9 8.2-7.2 10.1-4.3-1.9-7.2-5.6-7.2-10.1v-6L12 2.6z" />
+      <path d="M8.7 11.8l2.2 2.2 4.4-4.6" />
+    </symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24">
+      <path d="M4 12h15.5M13.2 5.5l6.3 6.5-6.3 6.5" />
+    </symbol>
+    <symbol id="i-close" viewBox="0 0 24 24">
+      <path d="M6 6l12 12M18 6L6 18" />
+    </symbol>
+    <symbol id="i-relay" viewBox="0 0 24 24">
+      <path d="M12 2.8l4.8 4.8L12 12.4 7.2 7.6 12 2.8z" />
+      <path d="M12 11.6l4.8 4.8L12 21.2l-4.8-4.8 4.8-4.8z" />
+      <path d="M7.2 7.6L2.8 12l4.4 4.4M16.8 7.6L21.2 12l-4.4 4.4" />
+    </symbol>
+    <symbol id="i-pass" viewBox="0 0 24 24">
+      <path d="M5 12h11" />
+      <path d="M12.5 7.5l4.5 4.5-4.5 4.5" />
+      <path d="M20 5v14" />
+    </symbol>
+  </svg>
+
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark"><svg><use href="#i-star"/></svg></span>
+        <span class="brand-copy">
+          <h1>VOID EMPIRES</h1>
+          <p>BLITZ PROTOCOL <span>·</span> SECTOR N-7</p>
+        </span>
+      </div>
+
+      <div class="top-center" aria-label="Turn and initiative">
+        <div class="turn-readout">
+          <span class="turn-caption">SHARED TURN</span>
+          <span class="turn-number" id="turnNumber">--</span>
+          <span class="turn-max">/ 20</span>
+        </div>
+        <div class="turn-meta">
+          <span class="initiative-label" id="initiativeLabel">AWAITING DEPLOYMENT</span>
+          <div class="turn-track" id="turnTrack" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <div class="seed-chip" id="seedChip" title="Galaxy seed">
+          <span>SEED</span>
+          <b id="seedText">--------</b>
+        </div>
+        <button class="icon-button" id="helpBtn" type="button" aria-label="How to play">
+          <svg><use href="#i-help"/></svg>
+        </button>
+        <button class="icon-button" id="menuBtn" type="button" aria-label="Match menu">
+          <svg><use href="#i-reset"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="command-grid">
+      <aside class="rail" aria-label="Dominion status and chronicle">
+        <div class="rail-scroll">
+          <div class="rail-heading"><span>DOMINION STATUS</span><span class="tiny-live"><i></i>LIVE</span></div>
+
+          <article class="empire-card human" id="humanCard" aria-label="Nadir Concord empire status">
+            <div class="empire-head">
+              <span class="empire-crest"><svg><use href="#i-star"/></svg></span>
+              <div class="empire-title">
+                <span class="micro-label">HUMAN COMMAND</span>
+                <h2>NADIR CONCORD</h2>
+              </div>
+              <span class="turn-stamp" id="humanStamp">STANDBY</span>
+            </div>
+            <div class="reserves">
+              <div class="reserve">
+                <span class="reserve-icon"><svg><use href="#i-credit"/></svg></span>
+                <div class="reserve-copy">
+                  <span class="reserve-label">CREDITS</span>
+                  <span class="reserve-value" id="humanCredits">--</span>
+                </div>
+                <span class="income-pill" id="humanCreditIncome">+0</span>
+              </div>
+              <div class="reserve">
+                <span class="reserve-icon"><svg><use href="#i-military"/></svg></span>
+                <div class="reserve-copy">
+                  <span class="reserve-label">MILITARY</span>
+                  <span class="reserve-value" id="humanMilitary">--</span>
+                </div>
+                <span class="income-pill" id="humanMilitaryIncome">+0</span>
+              </div>
+            </div>
+            <div class="empire-metrics">
+              <div><span>WORLDS</span><b id="humanWorlds">0</b></div>
+              <div><span>PRESTIGE</span><b id="humanPrestige">0</b></div>
+              <div><span>RELAYS</span><b id="humanRelays">0</b></div>
+            </div>
+            <div class="prestige-split" id="humanSplit">PLANET 0 · RELAY 0</div>
+            <div class="prestige-track"><span class="planet-part" id="humanPlanetBar"></span><span class="relay-part" id="humanRelayBar"></span></div>
+          </article>
+
+          <article class="empire-card rival" id="rivalCard" aria-label="Vulcan Ascendancy empire status">
+            <div class="empire-head">
+              <span class="empire-crest"><svg><use href="#i-military"/></svg></span>
+              <div class="empire-title">
+                <span class="micro-label">RIVAL HEURISTIC</span>
+                <h2>VULCAN ASCENDANCY</h2>
+              </div>
+              <span class="turn-stamp" id="rivalStamp">STANDBY</span>
+            </div>
+            <div class="reserves">
+              <div class="reserve">
+                <span class="reserve-icon"><svg><use href="#i-credit"/></svg></span>
+                <div class="reserve-copy">
+                  <span class="reserve-label">CREDITS</span>
+                  <span class="reserve-value" id="rivalCredits">--</span>
+                </div>
+                <span class="income-pill" id="rivalCreditIncome">+0</span>
+              </div>
+              <div class="reserve">
+                <span class="reserve-icon"><svg><use href="#i-military"/></svg></span>
+                <div class="reserve-copy">
+                  <span class="reserve-label">MILITARY</span>
+                  <span class="reserve-value" id="rivalMilitary">--</span>
+                </div>
+                <span class="income-pill" id="rivalMilitaryIncome">+0</span>
+              </div>
+            </div>
+            <div class="empire-metrics">
+              <div><span>WORLDS</span><b id="rivalWorlds">0</b></div>
+              <div><span>PRESTIGE</span><b id="rivalPrestige">0</b></div>
+              <div><span>RELAYS</span><b id="rivalRelays">0</b></div>
+            </div>
+            <div class="prestige-split" id="rivalSplit">PLANET 0 · RELAY 0</div>
+            <div class="prestige-track"><span class="planet-part" id="rivalPlanetBar"></span><span class="relay-part" id="rivalRelayBar"></span></div>
+          </article>
+
+          <section class="agenda-panel" aria-labelledby="agendaTitle">
+            <div class="panel-heading">
+              <h3 id="agendaTitle">SECTOR AGENDA</h3>
+              <span class="micro-label">FORECAST</span>
+            </div>
+            <div class="agenda-list" id="agendaList"></div>
+          </section>
+
+          <section class="chronicle-panel" aria-labelledby="chronicleTitle">
+            <div class="panel-heading">
+              <h3 id="chronicleTitle">CHRONICLE</h3>
+              <span class="micro-label">LATEST FIRST</span>
+            </div>
+            <ol class="chronicle" id="logList" aria-live="polite"></ol>
+          </section>
+        </div>
+      </aside>
+
+      <section class="map-panel" aria-label="Tactical star chart">
+        <div class="map-header">
+          <div class="phase-cluster">
+            <span class="phase-dot" id="phaseDot" aria-hidden="true"></span>
+            <div class="phase-copy">
+              <span class="phase-title" id="phaseTitle">AWAITING DEPLOYMENT</span>
+              <span class="phase-sub" id="phaseSub">Open the campaign briefing to begin.</span>
+            </div>
+          </div>
+          <div class="forecast-pill" id="forecastPill">
+            <span class="forecast-kicker">NEXT SCHEDULED</span>
+            <div class="forecast-copy">
+              <strong id="forecastTitle">Relay awakening</strong>
+              <span id="forecastMeta">End of turn 05</span>
+            </div>
+            <span class="forecast-turn" id="forecastTurn">T05</span>
+          </div>
+        </div>
+
+        <div class="chart" id="chart">
+          <div class="chart-grid" aria-hidden="true"></div>
+          <div class="chart-nebula" aria-hidden="true"></div>
+          <div class="chart-frame" aria-hidden="true"><i class="tl"></i><i class="tr"></i><i class="bl"></i><i class="br"></i></div>
+
+          <svg class="lane-layer" id="laneLayer" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+          <div class="world-layer" id="worldLayer"></div>
+
+          <div class="chart-stamp" aria-hidden="true">N-7 <span>/</span> TACTICAL OVERLAY</div>
+          <div class="compass" aria-hidden="true">
+            <span>N</span>
+            <i></i>
+            <b>7°</b>
+          </div>
+          <div class="scale-rule" aria-hidden="true"><span></span><small>5 AU</small></div>
+        </div>
+
+        <div class="map-footer">
+          <div class="conditions" id="conditions" aria-label="Active sector conditions"></div>
+          <div class="legend" aria-label="Chart legend">
+            <span class="legend-item"><i class="swatch human"></i>YOU ◆</span>
+            <span class="legend-item"><i class="swatch rival"></i>RIVAL ▲</span>
+            <span class="legend-item"><i class="swatch neutral"></i>NEUTRAL ○</span>
+            <span class="legend-item"><i class="swatch relay"></i>RELAY ◈</span>
+            <span class="legend-item"><i class="swatch protected"></i>PROTECTED</span>
+          </div>
+        </div>
+      </section>
+
+      <aside class="inspector" id="inspector" aria-label="World inspector and order composer">
+        <!-- Rendered by app.js -->
+      </aside>
+    </main>
+  </div>
+
+  <div class="mobile-actions" id="mobileActions" aria-label="Order actions">
+    <button class="mobile-summary" type="button" data-action="open-orders" id="mobileSummaryWrap" aria-label="Open world dossier">
+      <span class="micro-label" id="mobileKicker">ORDER</span>
+      <strong id="mobileSummary">No order staged</strong>
+      <span id="mobileCost">Select a world and stage an order</span>
+    </button>
+    <div class="mobile-buttons">
+      <button class="btn-pass compact" type="button" data-action="pass" id="mobilePass">
+        <span>Pass</span>
+      </button>
+      <button class="btn-commit compact" type="button" data-action="commit" id="mobileCommit">
+        <span>Commit</span>
+        <svg><use href="#i-arrow"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="toast-layer" id="toastLayer" role="status" aria-live="polite"></div>
+  <div class="sr-only" id="liveRegion" aria-live="polite"></div>
+
+  <!-- Campaign briefing -->
+  <div class="overlay briefing-overlay" id="briefingOverlay" role="dialog" aria-modal="true" aria-labelledby="briefingTitle" hidden>
+    <div class="briefing-panel">
+      <div class="briefing-ornament" aria-hidden="true"><span></span><i></i><span></span></div>
+      <span class="eyebrow">A TWENTY-TURN DUEL ACROSS A TWENTY-WORLD SECTOR</span>
+      <h1 id="briefingTitle"><span class="void-word">VOID</span><span class="empire-word">EMPIRES</span></h1>
+      <p class="briefing-lede">
+        One chart. One rival. Twenty turns to decide who inherits the sector.
+        Colonize the frontier, fortify your worlds, and seize the ancient relays before the stars go dark.
+      </p>
+
+      <div class="briefing-steps">
+        <article class="brief-step">
+          <span class="step-index">01</span>
+          <span class="step-icon"><svg><use href="#i-worlds"/></svg></span>
+          <h3>SELECT</h3>
+          <p>Tap any world to open its dossier. All holdings, lanes, costs, and reserves are public.</p>
+        </article>
+        <article class="brief-step">
+          <span class="step-index">02</span>
+          <span class="step-icon"><svg><use href="#i-expand"/></svg></span>
+          <h3>COMMIT</h3>
+          <p>Colonize neutral neighbors, improve a world, or assault the rival. One order per shared turn.</p>
+        </article>
+        <article class="brief-step">
+          <span class="step-index">03</span>
+          <span class="step-icon"><svg><use href="#i-prestige"/></svg></span>
+          <h3>ENDURE</h3>
+          <p>Eliminate the rival or lead on final prestige after turn twenty. Planet value plus relay dividends.</p>
+        </article>
+      </div>
+
+      <div class="relay-brief">
+        <span class="relay-sigil"><svg><use href="#i-relay"/></svg></span>
+        <div>
+          <strong>THE RELAY CLOCK</strong>
+          <p>Meridian I and II awaken at the end of turn 5, gaining production before turn 6. Every owned relay banks <b>+2 prestige</b> at the end of turns 5–20.</p>
+        </div>
+        <span class="relay-brief-tag">T05 → T20</span>
+      </div>
+
+      <div class="briefing-meta">
+        <span>SEED <b id="briefingSeed">--------</b></span>
+        <span>20 WORLDS</span>
+        <span>23 LANES</span>
+        <span>NO DICE</span>
+      </div>
+
+      <button class="btn-primary briefing-cta" id="beginBtn" type="button">
+        <span id="beginBtnLabel">INITIATE CAMPAIGN</span>
+        <svg><use href="#i-arrow"/></svg>
+      </button>
+      <p class="briefing-footnote" id="briefingFootnote">You command the Nadir Concord. The Vulcan Ascendancy waits.</p>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div class="overlay result-overlay" id="resultOverlay" role="dialog" aria-modal="true" aria-labelledby="resultTitle" hidden>
+    <div class="result-panel" id="resultPanel">
+      <div class="result-ornament" aria-hidden="true"><span></span><i></i><span></span></div>
+      <span class="eyebrow" id="resultEyebrow">CAMPAIGN COMPLETE · FINAL TALLY</span>
+      <h1 id="resultTitle">SECTOR SECURED</h1>
+      <p class="result-reason" id="resultReason"></p>
+
+      <div class="score-grid" id="scoreGrid"></div>
+
+      <div class="score-formula">
+        <span>TOTAL PRESTIGE</span>
+        <b>(3 × WORLDS + E + I + D) + BANKED RELAY PRESTIGE</b>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn-secondary" id="resultReplay" type="button">
+          <svg><use href="#i-reset"/></svg>
+          REPLAY SEED
+        </button>
+        <button class="btn-primary" id="resultNew" type="button">
+          <span>NEW GALAXY</span>
+          <svg><use href="#i-arrow"/></svg>
+        </button>
+      </div>
+      <p class="result-seed">SEED <b id="resultSeed">--------</b> · 20 SHARED TURNS</p>
+    </div>
+  </div>
+
+  <!-- Restart confirmation -->
+  <div class="overlay menu-overlay" id="menuOverlay" role="dialog" aria-modal="true" aria-labelledby="menuTitle" hidden>
+    <div class="menu-panel">
+      <button class="menu-close" id="menuClose" type="button" aria-label="Close menu"><svg><use href="#i-close"/></svg></button>
+      <span class="eyebrow">COMMAND OVERRIDE</span>
+      <h2 id="menuTitle">Abandon this campaign?</h2>
+      <p>The sector will reset. Replay keeps the same seeded map; a new galaxy rolls a fresh chart.</p>
+      <div class="menu-actions">
+        <button class="btn-ghost" id="menuCancel" type="button">CANCEL</button>
+        <button class="btn-secondary" id="menuReplay" type="button">REPLAY SEED</button>
+        <button class="btn-primary" id="menuNew" type="button"><span>NEW GALAXY</span><svg><use href="#i-arrow"/></svg></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

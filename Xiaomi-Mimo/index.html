@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Void Empires — Blitz</title>
+<meta name="description" content="A 20-turn single-player strategy match across a small connected galaxy." />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ============ INTRO ============ -->
+<div class="overlay" id="intro" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <div class="overlay-card intro-card">
+    <p class="eyebrow">Command deck · seeded skirmish</p>
+    <h1 id="intro-title">Void Empires <span>— Blitz</span></h1>
+    <p class="lede">
+      Twenty worlds. Two empires. Twenty shared turns. Bank prestige from the ancient
+      relays, out-produce your rival, and end the match with the higher score — or
+      take their last world and win on the spot.
+    </p>
+
+    <div class="how">
+      <div class="how-step">
+        <span class="how-num">1</span>
+        <div><strong>Select a world</strong><p>Tap any world on the chart. Selecting spends nothing — the inspector shows owner, profile, E/I/D, production, and capture protection.</p></div>
+      </div>
+      <div class="how-step">
+        <span class="how-num">2</span>
+        <div><strong>Choose a legal order</strong><p><em>Expand</em> onto an adjacent neutral world, <em>Develop</em> one attribute for 8&#162;, or <em>Attack</em> an adjacent enemy world. Every price is shown before you commit.</p></div>
+      </div>
+      <div class="how-step">
+        <span class="how-num">3</span>
+        <div><strong>Commit or Pass</strong><p>Commit resolves your order immediately; Pass keeps your reserves. On even turns the rival moves first, after income.</p></div>
+      </div>
+    </div>
+
+    <div class="relay-note">
+      <span class="relay-glyph" aria-hidden="true">◆</span>
+      <div><strong>Relay timing:</strong> at the end of turn 5 both relays awaken (+1 Economy, +1 Industry)
+      and each pays its owner <strong>+2 prestige</strong>. They keep paying every turn through turn 20 —
+      holding one for all 16 awards is worth 32 prestige. Watch for the supernova (no Military income on
+      turn 11) and the blockade (+8&#162; attack cost, turns 16–19).</div>
+    </div>
+
+    <button class="btn btn-primary btn-lg" id="intro-start">Enter the galaxy</button>
+    <p class="fineprint">Mouse, touch, and keyboard supported. Keyboard: <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> stage orders · <kbd>↑↓←→</kbd> navigate · <kbd>Enter</kbd> commit · <kbd>P</kbd> pass</p>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div class="app" id="app" aria-hidden="false">
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <span class="brand-name">Void Empires <b>— Blitz</b></span>
+    </div>
+
+    <div class="turnbox" id="turnbox" aria-live="polite">
+      <span class="turn-num" id="turn-num">Turn 1/20</span>
+      <span class="phase-pill" id="phase-pill">Your order</span>
+      <span class="initiative" id="initiative">You have initiative</span>
+    </div>
+
+    <div class="topbar-actions">
+      <span class="seed-chip" id="seed-chip" title="Map seed — same seed plus the same orders reproduces the match">Seed —</span>
+      <button class="btn btn-ghost" id="btn-restart" title="Restart this seed from turn 1">Replay seed</button>
+      <button class="btn btn-ghost" id="btn-new" title="Start a match on a fresh random map">New galaxy</button>
+    </div>
+  </header>
+
+  <!-- Event forecast banner -->
+  <section class="eventbar" id="eventbar" aria-label="Event forecast">
+    <div class="event-now" id="event-now"></div>
+    <ol class="event-track" id="event-track"></ol>
+  </section>
+
+  <!-- Empire status strip: horizontal, above the chart -->
+  <section class="status-strip" aria-label="Empire status">
+    <article class="empire-card human" id="card-human">
+      <header>
+        <span class="crest" aria-hidden="true">◈</span>
+        <div class="empire-id"><h2>Azure Combine</h2><p>You · engine world 06</p></div>
+        <span class="badge" id="human-badge">—</span>
+      </header>
+      <div class="reserves">
+        <div class="reserve"><span class="res-ico cr" aria-hidden="true">¢</span><div><b id="human-credits">14</b><small>Credits</small></div></div>
+        <div class="reserve"><span class="res-ico mil" aria-hidden="true">⚔</span><div><b id="human-mil">0</b><small>Military</small></div></div>
+        <div class="reserve"><span class="res-ico wrld" aria-hidden="true">◉</span><div><b id="human-worlds">1</b><small>Worlds</small></div></div>
+      </div>
+      <div class="income-line" id="human-income"></div>
+      <div class="prestige-line" id="human-prestige"></div>
+      <div class="score-line" id="human-score"></div>
+    </article>
+
+    <section class="logcard">
+      <h3>Dispatches</h3>
+      <ol class="log" id="log" aria-live="polite"></ol>
+    </section>
+
+    <article class="empire-card rival" id="card-ai">
+      <header>
+        <span class="crest" aria-hidden="true">◈</span>
+        <div class="empire-id"><h2>Ember Court</h2><p>Rival · engine world 15</p></div>
+        <span class="badge" id="ai-badge">—</span>
+      </header>
+      <div class="reserves">
+        <div class="reserve"><span class="res-ico cr" aria-hidden="true">¢</span><div><b id="ai-credits">14</b><small>Credits</small></div></div>
+        <div class="reserve"><span class="res-ico mil" aria-hidden="true">⚔</span><div><b id="ai-mil">0</b><small>Military</small></div></div>
+        <div class="reserve"><span class="res-ico wrld" aria-hidden="true">◉</span><div><b id="ai-worlds">1</b><small>Worlds</small></div></div>
+      </div>
+      <div class="income-line" id="ai-income"></div>
+      <div class="prestige-line" id="ai-prestige"></div>
+      <div class="score-line" id="ai-score"></div>
+    </article>
+  </section>
+
+  <main class="layout">
+    <!-- Left: galaxy chart (wider) -->
+    <section class="map-col" aria-label="Galaxy chart">
+      <div class="map-frame" id="map-frame">
+        <svg class="lanes" id="lanes" aria-hidden="true"></svg>
+        <div class="grid" id="grid" role="group" aria-label="Twenty worlds, four rows by five columns"></div>
+      </div>
+      <div class="legend" aria-hidden="false">
+        <span><i class="sw sw-human"></i>Your worlds</span>
+        <span><i class="sw sw-rival"></i>Rival worlds</span>
+        <span><i class="sw sw-neutral"></i>Neutral</span>
+        <span><i class="sw sw-relay">◆</i>Relay (prestige)</span>
+        <span><i class="sw sw-protected">⛨</i>Capture-protected</span>
+        <span><i class="sw sw-target"></i>Legal target</span>
+      </div>
+    </section>
+
+    <!-- Right: inspector + composer -->
+    <section class="side-col" aria-label="Inspector and order composer">
+      <section class="panel inspector" id="inspector" aria-live="polite"></section>
+
+      <section class="panel composer" id="composer" aria-label="Order composer"></section>
+
+      <div class="commit-row">
+        <button class="btn btn-pass" id="btn-pass">Pass</button>
+        <button class="btn btn-primary" id="btn-commit" disabled>Commit order</button>
+      </div>
+      <p class="commit-hint" id="commit-hint">Select a world, choose an order, then commit — or pass.</p>
+    </section>
+  </main>
+</div>
+
+<!-- ============ RESULT ============ -->
+<div class="overlay hidden" id="result" role="dialog" aria-modal="true" aria-labelledby="result-title">
+  <div class="overlay-card result-card">
+    <p class="eyebrow" id="result-eyebrow">Match complete</p>
+    <h2 id="result-title">Victory</h2>
+    <p class="lede" id="result-sub"></p>
+    <div class="result-table" id="result-table"></div>
+    <div class="result-actions">
+      <button class="btn btn-primary btn-lg" id="btn-newgalaxy">New Galaxy</button>
+      <button class="btn btn-ghost btn-lg" id="btn-replayseed">Replay Seed</button>
+    </div>
+    <p class="fineprint" id="result-fine"></p>
+  </div>
+</div>
+
+<script src="game.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

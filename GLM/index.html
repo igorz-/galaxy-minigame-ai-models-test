@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Void Empires — Blitz</title>
+<style>
+/* ============================================================
+   VOID EMPIRES — BLITZ · single-file build
+   Design direction: warm-dark star cartography.
+   You = amber, rival = glacial blue, relays = gold hexes.
+   ============================================================ */
+*{box-sizing:border-box}
+:root{
+  --bg:#05070d;
+  --panel:#0c1220; --panel2:#0f1728; --line:#243352; --line-soft:#1a2440;
+  --text:#e9eef8; --muted:#93a1b8; --faint:#647189;
+  --human:#ffb454; --human-dim:#54401f;
+  --ai:#6fd8ff; --ai-dim:#14344a;
+  --gold:#ffd166; --shield:#b491ff;
+  --ok:#5fe3a1; --bad:#ff7186;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,"Helvetica Neue",sans-serif;
+}
+html,body{margin:0;padding:0}
+body{
+  background:
+    radial-gradient(1100px 600px at 15% -5%, #0e1830 0%, transparent 60%),
+    radial-gradient(900px 600px at 90% 110%, #171122 0%, transparent 55%),
+    var(--bg);
+  color:var(--text); font-family:var(--sans); min-height:100vh;
+}
+#app{max-width:1560px;margin:0 auto;padding:0 12px 18px}
+button{font-family:var(--sans)}
+b,strong{font-weight:700}
+
+/* ---------- top bar ---------- */
+#topbar{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:10px 6px 10px;border-bottom:1px solid var(--line-soft);margin-bottom:12px;
+  flex-wrap:wrap;
+}
+.brand .btitle{font-size:19px;font-weight:800;letter-spacing:.14em}
+.brand .btitle em{font-style:normal;color:var(--gold)}
+.brand .bsub{font-size:11px;color:var(--faint);letter-spacing:.08em;margin-top:2px}
+.turnbox{text-align:center}
+#turnLabel{font:700 15px var(--mono);letter-spacing:.1em}
+#ticks{display:flex;gap:3px;justify-content:center;margin-top:5px}
+#ticks span{width:13px;height:6px;border-radius:3px;background:#1c2946}
+#ticks span.done{background:#33415f}
+#ticks span.cur{background:var(--gold);box-shadow:0 0 8px #ffd16688}
+#ticks span.flare{background:#5a3d8f}
+#ticks span.block{background:#6e2b3a}
+#ticks span.done.flare,#ticks span.done.block{opacity:.8}
+.statusbox{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+#phaseChip{
+  font:700 12px var(--sans);letter-spacing:.12em;padding:6px 13px;border-radius:20px;
+  border:1px solid var(--line);background:#0d1526;display:inline-flex;align-items:center;gap:8px;
+}
+#phaseChip::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--faint)}
+#phaseChip.human::before{background:var(--human);box-shadow:0 0 8px var(--human)}
+#phaseChip.ai::before{background:var(--ai);box-shadow:0 0 8px var(--ai);animation:blink 1.1s infinite}
+#phaseChip.over::before{background:var(--bad)}
+#phaseChip.human{color:var(--human);border-color:#4b3616}
+#phaseChip.ai{color:var(--ai);border-color:#1c4a63}
+@keyframes blink{50%{opacity:.35}}
+#seedChip{font:600 11px var(--mono);color:var(--faint);letter-spacing:.08em}
+
+/* ---------- main layout ---------- */
+#main{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:14px;align-items:start}
+#mapwrap{
+  background:linear-gradient(180deg,#0a0f1c,#080c16);
+  border:1px solid var(--line-soft);border-radius:16px;overflow:hidden;position:relative;
+}
+#map{display:block;width:100%;height:auto;max-height:calc(100vh - 110px)}
+#side{display:flex;flex-direction:column;gap:12px;min-width:0}
+
+/* ---------- generic card ---------- */
+.card{
+  background:linear-gradient(180deg,#0e1626,#0b111e);
+  border:1px solid var(--line-soft);border-radius:14px;padding:13px 14px;
+}
+.cardtitle{font:700 10.5px var(--sans);letter-spacing:.18em;color:var(--faint);margin-bottom:9px}
+
+/* ---------- empire cards ---------- */
+#empireCards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ecard{border-radius:14px;padding:12px 13px;border:1px solid var(--line-soft);background:linear-gradient(180deg,#0e1626,#0b111e)}
+.ecard.H{border-color:#4b3616;box-shadow:inset 0 0 0 1px #ffb45414}
+.ecard.A{border-color:#1c4a63;box-shadow:inset 0 0 0 1px #6fd8ff14}
+.echead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:9px}
+.ename{font-weight:800;font-size:12.5px;letter-spacing:.1em}
+.ecard.H .ename{color:var(--human)} .ecard.A .ename{color:var(--ai)}
+.etag{font:700 9px var(--sans);letter-spacing:.14em;color:var(--faint);border:1px solid var(--line);padding:2px 6px;border-radius:9px}
+.ecres{display:flex;gap:14px}
+.ecres>div{display:flex;flex-direction:column;gap:1px}
+.ecres i{font:600 9.5px var(--sans);letter-spacing:.1em;color:var(--faint);font-style:normal}
+.ecres b{font:700 17px var(--mono)}
+.ecinc{font:600 10.5px var(--mono);color:var(--muted);margin-top:8px}
+.ecinc .warn{color:var(--shield)}
+.ecscore{font:600 11px var(--mono);margin-top:4px;color:var(--muted)}
+.ecscore b{color:var(--gold);font-size:13px}
+.ecscore span{color:var(--faint)}
+
+/* ---------- inspector ---------- */
+.ins-empty{color:var(--faint);font-size:12.5px;padding:4px 0}
+.ins-head{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+.ins-num{font:800 20px var(--mono);color:var(--gold)}
+.ins-name{font-weight:800;font-size:15px}
+.ins-role{font:700 9px var(--sans);letter-spacing:.14em;color:var(--faint);border:1px solid var(--line);padding:2px 6px;border-radius:8px}
+.ins-owner{font:600 11px var(--mono);margin:6px 0 8px}
+.ins-owner.H{color:var(--human)} .ins-owner.A{color:var(--ai)} .ins-owner.N{color:var(--muted)}
+.ins-levels{display:flex;gap:8px;margin-bottom:8px}
+.ins-levels>div{flex:1;display:flex;flex-direction:column;align-items:center;background:#0a101d;border:1px solid var(--line-soft);border-radius:9px;padding:6px 0}
+.ins-levels i{font:600 9px var(--sans);letter-spacing:.12em;color:var(--faint);font-style:normal}
+.ins-levels b{font:800 16px var(--mono)}
+.ins-prod,.ins-lanes,.ins-value{font:500 11.5px var(--mono);color:var(--muted);margin-top:6px;line-height:1.5}
+.ins-shield{margin-top:8px;font:700 11px var(--mono);color:var(--shield);background:#1c1430;border:1px solid #3a2b63;border-radius:8px;padding:6px 9px}
+.ins-relay{margin-top:6px;font:600 10.5px var(--mono);color:var(--gold);background:#171410;border:1px solid #4a3d1d;border-radius:8px;padding:5px 9px}
+
+/* ---------- order console ---------- */
+#console{border-color:#2a3a5e}
+.ctarget{font:600 12px var(--mono);color:var(--muted);margin-bottom:10px}
+.ctarget b{color:var(--text)}
+.orderbtns{display:flex;flex-direction:column;gap:7px}
+.obtn{
+  display:grid;grid-template-columns:1fr auto;align-items:center;column-gap:10px;
+  width:100%;text-align:left;padding:9px 12px;border-radius:10px;cursor:pointer;
+  background:#101a2e;border:1px solid var(--line-soft);color:var(--text);
+  transition:border-color .15s,background .15s;
+}
+.obtn:not(:disabled):hover{border-color:#3c538a;background:#13203a}
+.obtn .on{font:800 12px var(--sans);letter-spacing:.1em}
+.obtn .oc{font:700 11px var(--mono);color:var(--muted)}
+.obtn.active{border-color:var(--gold);background:#1a1a10;box-shadow:inset 0 0 0 1px #ffd16633}
+.obtn.active .on{color:var(--gold)}
+.obtn:disabled{opacity:.45;cursor:not-allowed}
+.obtn .reason{grid-column:1/-1;font:500 10.5px var(--mono);color:var(--bad);margin-top:3px}
+.attrrow{margin-top:10px}
+.arlabel{font:700 9.5px var(--sans);letter-spacing:.14em;color:var(--faint);margin-bottom:6px}
+.arbtns{display:flex;gap:7px}
+.abtn{
+  flex:1;padding:7px 4px;border-radius:9px;cursor:pointer;background:#101a2e;
+  border:1px solid var(--line-soft);color:var(--text);display:flex;flex-direction:column;gap:1px;align-items:center;
+}
+.abtn b{font-size:11px;letter-spacing:.06em}
+.abtn span{font:600 10px var(--mono);color:var(--muted)}
+.abtn.active{border-color:var(--ok);background:#0f2018}
+.abtn.active b{color:var(--ok)}
+.abtn:disabled{opacity:.4;cursor:not-allowed}
+.preview{margin-top:10px;font:600 11.5px var(--mono);line-height:1.55;border-radius:10px;padding:9px 11px;border:1px solid var(--line-soft);background:#0a101d}
+.preview.ok{border-color:#1f4a38;color:var(--ok)}
+.preview.bad{border-color:#4a1f2b;color:var(--bad)}
+.preview.muted{color:var(--faint)}
+.actions{display:flex;gap:9px;margin-top:11px}
+.actions button{
+  flex:1;padding:12px 8px;border-radius:11px;font:800 12px var(--sans);letter-spacing:.12em;cursor:pointer;
+  border:1px solid var(--line);background:#111b30;color:var(--text);transition:.15s;
+}
+#commitBtn{border-color:#4b3616;background:linear-gradient(180deg,#2a1f0e,#1d1508);color:var(--gold)}
+#commitBtn:not(:disabled):hover{box-shadow:0 0 14px #ffd16630}
+#commitBtn:disabled{opacity:.35;cursor:not-allowed;background:#111b30;color:var(--muted)}
+#passBtn:not(:disabled):hover{border-color:#3c538a}
+#passBtn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ---------- forecast ---------- */
+.activechips{display:flex;flex-direction:column;gap:5px;margin-bottom:9px}
+.achip{font:700 10px var(--mono);letter-spacing:.06em;padding:5px 9px;border-radius:8px}
+.achip.flare{color:var(--shield);background:#1c1430;border:1px solid #3a2b63}
+.achip.block{color:var(--bad);background:#251017;border:1px solid #54222f}
+.beats{display:flex;flex-direction:column;gap:6px}
+.beat{display:grid;grid-template-columns:auto 1fr;gap:9px;padding:7px 9px;border-radius:9px;border:1px solid transparent}
+.beat .bt{font:700 10px var(--mono);color:var(--faint);white-space:nowrap;padding-top:1px}
+.beat .bb{font:600 11px var(--sans);color:var(--muted);line-height:1.4}
+.beat .bb b{color:var(--text)}
+.beat.done{opacity:.42}
+.beat.done .bb b::after{content:" ✓";color:var(--ok)}
+.beat.next{border-color:#4b3616;background:#151206}
+.beat.next .bb b{color:var(--gold)}
+.beat.active{border-color:#3a2b63;background:#150f22}
+.beat.active .bb b{color:var(--shield)}
+
+/* ---------- log ---------- */
+#logList{display:flex;flex-direction:column;gap:4px;max-height:210px;overflow-y:auto;font:500 11px var(--mono);line-height:1.45}
+.li{padding:4px 8px;border-radius:7px;background:#0a101d;color:var(--muted)}
+.li .lt{color:var(--faint);margin-right:6px}
+.li.H{border-left:2px solid var(--human)}
+.li.A{border-left:2px solid var(--ai)}
+.li.event{border-left:2px solid var(--gold);color:#cbb877}
+.li.warn{border-left:2px solid var(--shield)}
+
+/* ---------- star map ---------- */
+.lane{stroke:#26324e;stroke-width:2;transition:opacity .2s}
+.lane.relaylane{stroke:#6b5b2a;stroke-dasharray:7 5;stroke-width:2.3}
+.lane.dim{opacity:.15}
+.lane.hl1{stroke:#93a7cc;opacity:.85}
+.lane.hl2{stroke:var(--gold);opacity:1;stroke-width:2.8}
+.node{cursor:pointer;outline:none}
+.node .body{fill:#111a2c;stroke:#3b4a66;stroke-width:2.5;transition:stroke .2s,fill .2s}
+.node[data-owner="H"] .body{fill:#271c0d;stroke:var(--human)}
+.node[data-owner="A"] .body{fill:#0c2230;stroke:var(--ai)}
+.node.relay[data-owner="N"] .body{fill:#1b1910;stroke:#a08a45}
+.node.relay .tag{fill:#ffd16688}
+.node .num{fill:var(--text);font:800 15px var(--mono);text-anchor:middle;pointer-events:none}
+.node .nm{fill:#aeb9cc;font:600 12px var(--sans);text-anchor:middle;pointer-events:none}
+.node .st{fill:#7e8ca3;font:600 10.5px var(--mono);text-anchor:middle;pointer-events:none}
+.node .tag{fill:var(--faint);font:700 8.5px var(--sans);letter-spacing:.14em;text-anchor:middle;pointer-events:none}
+.node .sh{fill:var(--shield);font:700 10.5px var(--mono);text-anchor:middle;pointer-events:none}
+.node .prot{fill:none;stroke:var(--shield);stroke-width:1.7;stroke-dasharray:5 4;opacity:0}
+.node.prot .prot{opacity:.95}
+.node .halo{fill:none;stroke:transparent;stroke-width:2.2;opacity:0}
+.node.sel .halo{stroke:#ffffff;opacity:1;animation:pulse 1.7s infinite}
+.node:focus-visible .halo{stroke:#ffffff;opacity:.85}
+.node.legal .halo{stroke:#ffffff;opacity:.4;stroke-dasharray:3 5;stroke-width:1.8}
+.node.pend .halo{stroke:var(--gold);opacity:1;animation:pulse 1.7s infinite}
+.node.pendBad .halo{stroke:var(--bad);opacity:1;stroke-dasharray:4 4}
+@keyframes pulse{0%,100%{stroke-opacity:1}50%{stroke-opacity:.35}}
+
+/* ---------- overlays ---------- */
+.overlay{position:fixed;inset:0;background:#04060bd9;backdrop-filter:blur(7px);display:grid;place-items:center;z-index:40;padding:18px;overflow-y:auto}
+.overlay.hidden{display:none}
+.ovcard{
+  width:min(680px,100%);background:linear-gradient(180deg,#0f1728,#0a101d);
+  border:1px solid var(--line);border-radius:18px;padding:26px 28px;box-shadow:0 30px 80px #0009;
+}
+.ovtitle{font:800 26px var(--sans);letter-spacing:.1em;text-align:center}
+.ovtitle em{font-style:normal;color:var(--gold)}
+.ovsub{text-align:center;color:var(--muted);font-size:13px;margin-top:6px}
+.steps{display:flex;flex-direction:column;gap:10px;margin:20px 0 4px}
+.step{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start}
+.stepnum{width:26px;height:26px;border-radius:50%;background:#1a2338;border:1px solid var(--line);display:grid;place-items:center;font:800 12px var(--mono);color:var(--gold)}
+.step p{margin:2px 0 0;font-size:12.5px;color:var(--muted);line-height:1.55}
+.step p b{color:var(--text)}
+.rulebox{margin-top:16px;border:1px solid var(--line-soft);border-radius:12px;background:#0a101d;padding:12px 14px}
+.rulebox h4{margin:0 0 8px;font:700 10px var(--sans);letter-spacing:.16em;color:var(--faint)}
+.rulebox table{width:100%;border-collapse:collapse;font:500 11.5px var(--mono);color:var(--muted)}
+.rulebox td{padding:3.5px 4px;border-top:1px solid #141d33}
+.rulebox td:first-child{color:var(--gold);font-weight:700;white-space:nowrap}
+.rulebox .notes{font:500 11px var(--mono);color:var(--faint);margin-top:9px;line-height:1.6}
+.seedrow{display:flex;gap:9px;margin-top:20px}
+.seedrow label{font:700 10px var(--sans);letter-spacing:.14em;color:var(--faint);align-self:center}
+#seedInput{
+  flex:1;background:#0a101d;border:1px solid var(--line);color:var(--gold);border-radius:10px;
+  padding:10px 12px;font:700 14px var(--mono);min-width:0;
+}
+#seedInput:focus{outline:none;border-color:var(--gold)}
+.reroll{width:42px;border-radius:10px;border:1px solid var(--line);background:#111b30;color:var(--muted);font-size:16px;cursor:pointer}
+.reroll:hover{color:var(--gold);border-color:#4b3616}
+.primary{
+  width:100%;margin-top:14px;padding:14px;border-radius:12px;cursor:pointer;
+  font:800 13px var(--sans);letter-spacing:.16em;color:#1a1206;
+  background:linear-gradient(180deg,#ffd97e,#f5a92e);border:none;box-shadow:0 6px 24px #ffd16630;
+}
+.primary:hover{filter:brightness(1.07)}
+/* result */
+.resbanner{text-align:center;font:800 34px var(--sans);letter-spacing:.16em;margin:6px 0 4px}
+.resbanner.win{color:var(--human);text-shadow:0 0 30px #ffb45466}
+.resbanner.lose{color:var(--ai);text-shadow:0 0 30px #6fd8ff55}
+.resbanner.draw{color:var(--gold)}
+.ressub{text-align:center;color:var(--muted);font-size:13px;margin-bottom:18px}
+.restable{width:100%;border-collapse:collapse;font:600 13px var(--mono)}
+.restable th{font:700 10px var(--sans);letter-spacing:.14em;color:var(--faint);padding:8px 6px;border-bottom:1px solid var(--line);text-align:right}
+.restable th:first-child{text-align:left}
+.restable td{padding:9px 6px;border-bottom:1px solid #141d33;text-align:right;color:var(--muted)}
+.restable td:first-child{text-align:left;color:var(--text)}
+.restable td.H{color:var(--human)} .restable td.A{color:var(--ai)}
+.restable tr.total td{font-weight:800;font-size:16px;border-bottom:none;padding-top:12px}
+.resbtns{display:flex;gap:10px;margin-top:20px}
+.resbtns button{
+  flex:1;padding:13px;border-radius:12px;cursor:pointer;font:800 11.5px var(--sans);letter-spacing:.14em;
+  border:1px solid var(--line);background:#111b30;color:var(--text);
+}
+.resbtns .primary{margin-top:0;flex:1.4}
+
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  #main{grid-template-columns:1fr}
+  #mapwrap{order:-1}
+  #map{max-height:none}
+  #mapscroll{overflow-x:auto}
+  #map{min-width:640px}
+  #console{position:sticky;bottom:0;z-index:20;box-shadow:0 -12px 30px #000a}
+  #topbar{justify-content:center}
+  .statusbox{align-items:center}
+  #empireCards{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="topbar">
+    <div class="brand">
+      <div class="btitle">VOID EMPIRES <em>—</em> BLITZ</div>
+      <div class="bsub">20 TURNS · TWO ANCIENT RELAYS · NO DICE</div>
+    </div>
+    <div class="turnbox">
+      <div id="turnLabel">TURN 1 / 20</div>
+      <div id="ticks"></div>
+    </div>
+    <div class="statusbox">
+      <div id="phaseChip">—</div>
+      <div id="seedChip">SEED —</div>
+    </div>
+  </header>
+  <main id="main">
+    <section id="mapwrap"><div id="mapscroll">
+      <svg id="map" viewBox="0 0 1000 740" role="group" aria-label="Star chart of twenty worlds connected by lanes">
+        <defs>
+          <radialGradient id="neb1" cx="28%" cy="22%" r="45%">
+            <stop offset="0%" stop-color="#27406e" stop-opacity=".30"/><stop offset="100%" stop-color="#27406e" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="neb2" cx="78%" cy="80%" r="50%">
+            <stop offset="0%" stop-color="#5e3524" stop-opacity=".20"/><stop offset="100%" stop-color="#5e3524" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <rect width="1000" height="740" fill="url(#neb1)"/>
+        <rect width="1000" height="740" fill="url(#neb2)"/>
+        <g id="stars"></g>
+        <g id="lanes"></g>
+        <g id="nodes"></g>
+      </svg>
+    </div></section>
+    <aside id="side">
+      <section id="empireCards"></section>
+      <section id="inspector" class="card"></section>
+      <section id="console" class="card"></section>
+      <section id="forecast" class="card"></section>
+      <section id="logcard" class="card">
+        <div class="cardtitle">COMM LOG</div>
+        <div id="logList"></div>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<!-- intro overlay -->
+<div id="intro" class="overlay">
+  <div class="ovcard">
+    <div class="ovtitle">VOID EMPIRES <em>—</em> BLITZ</div>
+    <div class="ovsub">Lead the Solace Accord across a 20-turn galaxy. Claim worlds, raise their levels, and bank prestige from the two ancient relays before the Vex Dominion does.</div>
+    <div class="steps">
+      <div class="step"><div class="stepnum">1</div><p><b>Select a world</b> on the star chart — every world, lane, level, and price is public. Inspecting costs nothing.</p></div>
+      <div class="step"><div class="stepnum">2</div><p><b>Stage an order:</b> Expand, Develop, or Attack. A staged order follows your selection — click another world to retarget it, and see its exact price before committing.</p></div>
+      <div class="step"><div class="stepnum">3</div><p><b>Commit or Pass.</b> One order per turn. You move first on odd turns; the rival moves first on even turns.</p></div>
+    </div>
+    <div class="rulebox">
+      <h4>FIELD MANUAL</h4>
+      <table>
+        <tr><td>INCOME</td><td>each turn: +2 Credits per Economy · +1 Military per Industry (owned worlds only)</td></tr>
+        <tr><td>EXPAND</td><td>12 + 4 × your world count Credits → claim an adjacent neutral world, attributes intact</td></tr>
+        <tr><td>DEVELOP</td><td>8 Credits → raise one attribute by 1 (max level 5), production from next turn</td></tr>
+        <tr><td>ATTACK</td><td>8 Credits + 4 + 6 × target Defense Military → capture an adjacent enemy world</td></tr>
+      </table>
+      <div class="notes">
+        Captured worlds are shielded for two turns (attackable on the third).<br>
+        The relays — 08 Meridian and 13 Zenith — awaken at the end of turn 5 and bank <b style="color:var(--gold)">+2 prestige</b> per held turn through turn 20.<br>
+        Turn 11: a solar flare suppresses all Military income. Turns 16–19: a blockade adds +8 Military to every attack.<br>
+        Final score = 3 per world + attribute levels + banked relay prestige. Higher total wins — or wipe out the rival entirely.
+      </div>
+    </div>
+    <div class="seedrow">
+      <label for="seedInput">SEED</label>
+      <input id="seedInput" inputmode="numeric" autocomplete="off" spellcheck="false">
+      <button id="rerollBtn" class="reroll" title="New random seed" aria-label="New random seed">⟳</button>
+    </div>
+    <button id="startBtn" class="primary">LAUNCH CAMPAIGN</button>
+  </div>
+</div>
+
+<!-- result overlay -->
+<div id="result" class="overlay hidden">
+  <div class="ovcard">
+    <div class="resbanner" id="resBanner">—</div>
+    <div class="ressub" id="resSub">—</div>
+    <table class="restable" id="resTable"></table>
+    <div class="resbtns">
+      <button id="replayBtn">REPLAY SEED</button>
+      <button id="newBtn" class="primary">NEW GALAXY</button>
+    </div>
+    <div style="text-align:center;margin-top:12px;font:600 10.5px var(--mono);color:var(--faint)" id="resSeed"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ==================================================================
+   1 · CONSTANTS & HELPERS
+   ================================================================== */
+const HUMAN='H', AI='A', MAX_TURN=20;
+const RELAY_IDS=[7,12];
+const HOME_IDS={H:5, A:14};
+const START_CREDITS=14, START_MIL=0;
+const DEVELOP_COST=8, ATTACK_CREDITS=8, ATTACK_BASE=4, ATTACK_PER_DEF=6;
+const BLOCKADE_EXTRA=8, BLOCKADE_FROM=16, BLOCKADE_TO=19;
+const ATTRS={E:{label:'Economy'},I:{label:'Industry'},D:{label:'Defense'}};
+const NAMES=['Cinder','Vale','Ossuary','Threnody','Palewater','Solace','Lantern','Meridian','Halcyon','Emberfall','Quietude','Vigil','Zenith','Farside','Vex Prime','Mourning','Karst','Perdition','Aviary','Ultima'];
+const PROFILE_ATTRS={Trade:[3,1,1],Forge:[1,3,1],Bastion:[1,1,3]};
+
+const other=e=>e===HUMAN?AI:HUMAN;
+const dispId=id=>String(id+1).padStart(2,'0');
+const seedHex=s=>'0'+(s>>>0).toString(16).toUpperCase().padStart(8,'0').slice(-8);
+const blockadeAt=t=>t>=BLOCKADE_FROM&&t<=BLOCKADE_TO;
+const attackMilCost=(def,turn)=>ATTACK_BASE+ATTACK_PER_DEF*def+(blockadeAt(turn)?BLOCKADE_EXTRA:0);
+const expandCost=ownedCount=>12+4*ownedCount;
+
+function mulberry32(seed){
+  let a=seed>>>0;
+  return function(){
+    a|=0; a=(a+0x6D2B79F5)|0;
+    let t=Math.imul(a^(a>>>15),1|a);
+    t=(t+Math.imul(t^(t>>>7),61|t))^t;
+    return ((t^(t>>>14))>>>0)/4294967296;
+  };
+}
+
+/* ---- fixed topology: 4 rows × 5 cols, 23 lanes ---- */
+function buildLanes(){
+  const L=[], seen=new Set();
+  const add=(a,b)=>{const k=a<b?a+'-'+b:b+'-'+a; if(!seen.has(k)){seen.add(k); L.push([a,b]);}};
+  for(let r=0;r<4;r++) for(let c=0;c<4;c++) add(r*5+c, r*5+c+1);   // 16 horizontal
+  for(let r=0;r<3;r++){ add(r*5,(r+1)*5); add(r*5+4,(r+1)*5+4); } // 6 vertical (outer columns)
+  add(7,12);                                                       // 1 ancient relay link
+  return L;
+}
+const LANES=buildLanes();
+const NEIGHBORS=(()=>{const n=Array.from({length:20},()=>[]); for(const[a,b]of LANES){n[a].push(b);n[b].push(a);} return n;})();
+const isRelayLane=(a,b)=>(a===7&&b===12)||(a===12&&b===7);
+
+/* map geometry */
+const POS=[];
+for(let r=0;r<4;r++) for(let c=0;c<5;c++) POS.push([95+c*202.5, 118+r*173]);
+
+/* ==================================================================
+   2 · STATE
+   ================================================================== */
+let st=null;                       // match state
+let ui={sel:-1, staged:null, pending:null}; // ui.sel = selected world; staged order; pending = queued AI step
+let phase='intro';                 // 'intro' | 'human' | 'ai' | 'over'
+let lastSeed=null;
+
+function generateWorlds(seed){
+  const rng=mulberry32(seed);
+  const prof=Array(20).fill(null);
+  const pairs=[[0,19],[1,18],[2,17],[3,16],[4,15],[5,14],[6,13],[7,12],[8,11],[9,10]];
+  for(const [a,b] of pairs){
+    const roll=rng();
+    prof[a]=prof[b]= roll<1/3?'Forge': roll<2/3?'Trade':'Bastion';
+  }
+  prof[0]=prof[19]='Forge';   // forced rotational anchors
+  prof[6]=prof[13]='Trade';
+  const worlds=[];
+  for(let id=0;id<20;id++){
+    const [E,I,D]=PROFILE_ATTRS[prof[id]];
+    worlds.push({id, name:NAMES[id], profile:prof[id], owner:null, E,I,D, protUntil:0});
+  }
+  for(const id of [HOME_IDS.H,HOME_IDS.A]) Object.assign(worlds[id],{E:3,I:2,D:2,profile:'Homeworld'});
+  for(const id of RELAY_IDS)              Object.assign(worlds[id],{E:2,I:2,D:2,profile:'Ancient Relay'});
+  worlds[HOME_IDS.H].owner=HUMAN;
+  worlds[HOME_IDS.A].owner=AI;
+  return worlds;
+}
+
+function newGame(seed){
+  lastSeed=seed>>>0;
+  st={
+    seed:lastSeed, turn:1, over:false, winner:null, endReason:null, elimTurn:0,
+    worlds:generateWorlds(lastSeed),
+    credits:{H:START_CREDITS,A:START_CREDITS},
+    military:{H:START_MIL,A:START_MIL},
+    prestige:{H:0,A:0},
+    log:[],
+    lastIncome:{H:{c:0,m:0},A:{c:0,m:0}},
+  };
+  ui={sel:-1, staged:null, pending:null};
+  phase='game';
+  buildMapStatic();
+  hideOverlays();
+  addLog('event',`Campaign seeded ${seedHex(st.seed)} — you hold 06 ${st.worlds[5].name}, the rival holds 15 ${st.worlds[14].name}.`);
+  beginTurn();
+}
+
+/* ==================================================================
+   3 · RULES
+   ================================================================== */
+const countOwned=(e)=>st.worlds.reduce((s,w)=>s+(w.owner===e?1:0),0);
+const sumAttr=(e,a)=>st.worlds.reduce((s,w)=>s+(w.owner===e?w[a]:0),0);
+const adjacentToEmpire=(id,e)=>NEIGHBORS[id].some(n=>st.worlds[n].owner===e);
+
+function payIncome(){
+  for(const e of [HUMAN,AI]){
+    const c=2*sumAttr(e,'E');
+    const m=st.turn===11?0:sumAttr(e,'I');
+    st.credits[e]+=c; st.military[e]+=m;
+    st.lastIncome[e]={c,m};
+  }
+  if(st.turn===11) addLog('warn','Solar flare — Military income is zero for both empires this turn.');
+}
+
+/* legality & exact cost of any order; shared by human UI and the AI */
+function orderInfo(empire,type,targetId,attr){
+  const w=st.worlds[targetId];
+  const foe=other(empire);
+  const no=reason=>({legal:false,reason,cost:null});
+  const yes=cost=>({legal:true,reason:'',cost});
+  if(type==='expand'){
+    if(w.owner===empire) return no('Already your world');
+    if(w.owner===foe)    return no('Held by the rival — attack instead');
+    if(!adjacentToEmpire(targetId,empire)) return no('No lane connects it to your empire');
+    const c=expandCost(countOwned(empire));
+    if(st.credits[empire]<c) return no(`Need ${c} Credits — you have ${st.credits[empire]}`);
+    return yes({c,m:0});
+  }
+  if(type==='develop'){
+    if(w.owner===foe)    return no('Held by the rival');
+    if(w.owner===null)   return no('Neutral world — expand first');
+    if(w[attr]>=5)       return no(`${ATTRS[attr].label} is already at level 5`);
+    if(st.credits[empire]<DEVELOP_COST) return no(`Need ${DEVELOP_COST} Credits — you have ${st.credits[empire]}`);
+    return yes({c:DEVELOP_COST,m:0});
+  }
+  if(type==='attack'){
+    if(w.owner===empire) return no('Your own world');
+    if(w.owner===null)   return no('Neutral world — Expand instead');
+    if(!adjacentToEmpire(targetId,empire)) return no('No lane connects it to your empire');
+    if(w.protUntil>=st.turn) return no(`Shielded through turn ${w.protUntil} — attackable on turn ${w.protUntil+1}`);
+    const m=attackMilCost(w.D,st.turn);
+    if(st.credits[empire]<ATTACK_CREDITS) return no(`Need ${ATTACK_CREDITS} Credits — you have ${st.credits[empire]}`);
+    if(st.military[empire]<m) return no(`Need ${m} Military — you have ${st.military[empire]}`);
+    return yes({c:ATTACK_CREDITS,m});
+  }
+  return no('Unknown order');
+}
+
+function applyOrder(empire,order){
+  const info=orderInfo(empire,order.type,order.target,order.attr);
+  if(!info.legal) return false;
+  const w=st.worlds[order.target];
+  const who=empire===HUMAN?'You':'Rival';
+  const d=dispId(order.target);
+  if(order.type==='expand'){
+    st.credits[empire]-=info.cost.c;
+    w.owner=empire;
+    addLog(empire,`${who} expand${empire===AI?'s':''} to ${d} ${w.name} (E${w.E} I${w.I} D${w.D}) — ${info.cost.c} Credits.`);
+  }else if(order.type==='develop'){
+    st.credits[empire]-=DEVELOP_COST;
+    addLog(empire,`${who} develop${empire===AI?'s':''} ${ATTRS[order.attr].label} on ${d} ${w.name} (${w[order.attr]}→${w[order.attr]+1}) — ${DEVELOP_COST} Credits.`);
+    w[order.attr]++;
+  }else{
+    st.credits[empire]-=ATTACK_CREDITS;
+    st.military[empire]-=info.cost.m;
+    w.owner=empire;
+    w.protUntil=st.turn+1;
+    addLog(empire,`${who} capture${empire===AI?'s':''} ${d} ${w.name} (E${w.E} I${w.I} D${w.D}) — ${ATTACK_CREDITS} Cr + ${info.cost.m} Mil. Shielded through turn ${st.turn+1}.`);
+    const foe=other(empire);
+    if(countOwned(foe)===0){
+      st.over=true; st.endReason='elim'; st.winner=empire; st.elimTurn=st.turn;
+      addLog('event', foe===HUMAN
+        ? 'Your last world has fallen — the match ends immediately.'
+        : 'The rival empire is wiped out — the match ends immediately.');
+    }
+  }
+  return true;
+}
+
+function getScore(e){
+  const owned=st.worlds.filter(w=>w.owner===e);
+  const pv=3*owned.length+owned.reduce((s,w)=>s+w.E+w.I+w.D,0);
+  return {worlds:owned.length, pv, relay:st.prestige[e], total:pv+st.prestige[e]};
+}
+
+function awardRelayPrestige(){
+  if(st.turn<5) return;
+  const gain={H:0,A:0};
+  for(const r of RELAY_IDS){const o=st.worlds[r].owner; if(o) gain[o]+=2;}
+  st.prestige.H+=gain.H; st.prestige.A+=gain.A;
+  if(gain.H||gain.A) addLog('event',`Relays bank +2 each — You +${gain.H} · Rival +${gain.A}.`);
+}
+
+/* ==================================================================
+   4 · RIVAL AI  (deterministic priority list)
+   ================================================================== */
+function aiChoose(){
+  const legalA=id=>orderInfo(AI,'attack',id).legal;
+  const legalX=id=>orderInfo(AI,'expand',id).legal;
+
+  // 1 · capture the human's final world → instant win
+  const humanWorlds=st.worlds.filter(w=>w.owner===HUMAN);
+  if(humanWorlds.length===1 && legalA(humanWorlds[0].id)) return {type:'attack',target:humanWorlds[0].id};
+
+  // 2 · relays: capture human-held, else expand onto neutral (lower ID first)
+  for(const r of RELAY_IDS) if(st.worlds[r].owner===HUMAN && legalA(r)) return {type:'attack',target:r};
+  for(const r of RELAY_IDS) if(st.worlds[r].owner===null && legalX(r)) return {type:'expand',target:r};
+
+  // 3 · defend an owned relay bordering the human when the shield flips the affordability
+  const threatTurn = st.turn%2===0 ? st.turn : st.turn+1; // human acts after AI on even turns
+  for(const r of RELAY_IDS){
+    const w=st.worlds[r];
+    if(w.owner!==AI || !adjacentToEmpire(r,HUMAN) || w.D>=5) continue;
+    if(w.protUntil>=threatTurn) continue; // still shielded next turn
+    const sur=blockadeAt(threatTurn)?BLOCKADE_EXTRA:0;
+    const before=ATTACK_BASE+ATTACK_PER_DEF*w.D+sur;
+    const after =ATTACK_BASE+ATTACK_PER_DEF*(w.D+1)+sur;
+    if(st.credits[HUMAN]>=ATTACK_CREDITS && st.military[HUMAN]>=before && st.military[HUMAN]<after)
+      return {type:'develop',target:r,attr:'D'};
+  }
+
+  // 4 · capture the highest-value legal non-relay enemy world
+  let best=null;
+  for(const w of st.worlds){
+    if(w.owner!==HUMAN || RELAY_IDS.includes(w.id) || !legalA(w.id)) continue;
+    const val=3+w.E+w.I+w.D, cost=orderInfo(AI,'attack',w.id).cost.m;
+    if(!best || val>best.val || (val===best.val && (cost<best.cost || (cost===best.cost && w.id<best.id))))
+      best={id:w.id,val,cost};
+  }
+  if(best) return {type:'attack',target:best.id};
+
+  // 5 · expand toward a neutral relay not yet adjacent; else best neutral world
+  for(const r of RELAY_IDS){
+    if(st.worlds[r].owner!==null || adjacentToEmpire(r,AI)) continue;
+    const cands=NEIGHBORS[r].filter(n=>st.worlds[n].owner===null && legalX(n));
+    if(cands.length) return {type:'expand',target:Math.min(...cands)};
+  }
+  let bestN=null;
+  for(const w of st.worlds){
+    if(w.owner!==null || !legalX(w.id)) continue;
+    const s=w.E+w.I;
+    if(!bestN || s>bestN.s || (s===bestN.s && (w.E>bestN.e || (w.E===bestN.e && w.id<bestN.id))))
+      bestN={id:w.id,s,e:w.E};
+  }
+  if(bestN) return {type:'expand',target:bestN.id};
+
+  // 6 · develop
+  if(st.turn<=16){
+    const prefs = 2*sumAttr(AI,'E')<12 ? ['E','I'] : ['I','E'];
+    for(const a of prefs){
+      const t=st.worlds.filter(w=>w.owner===AI && w[a]<5).sort((x,y)=>x.id-y.id)[0];
+      if(t) return {type:'develop',target:t.id,attr:a};
+    }
+  }else{
+    for(const r of RELAY_IDS){
+      const w=st.worlds[r];
+      if(w.owner===AI && w.D<5 && adjacentToEmpire(r,HUMAN)) return {type:'develop',target:r,attr:'D'};
+    }
+    // first legal development: lower world ID, then Economy before Industry before Defense
+    const ownedSorted=st.worlds.filter(x=>x.owner===AI).sort((a,b)=>a.id-b.id);
+    for(const w of ownedSorted)
+      for(const a of ['E','I','D'])
+        if(w[a]<5) return {type:'develop',target:w.id,attr:a};
+  }
+  // 7 · pass
+  return {type:'pass'};
+}
+
+/* ==================================================================
+   5 · TURN ENGINE
+   ================================================================== */
+const aiDelay=()=>window.__fast?0:800;
+
+function beginTurn(){
+  if(st.over) return;
+  payIncome();
+  if(st.turn%2===0){ phase='ai'; scheduleAI('ai-first'); }
+  else { phase='human'; }
+  render();
+}
+function scheduleAI(kind){
+  ui.pending=kind;
+  setTimeout(()=>{ if(ui.pending===kind) processPending(); }, aiDelay());
+}
+function processPending(){
+  if(!ui.pending || st.over) return;
+  const kind=ui.pending; ui.pending=null;
+  const order=aiChoose();
+  if(order.type==='pass') addLog(AI,'Rival passes.');
+  else applyOrder(AI,order);
+  render();
+  if(st.over){ showResult(); return; }
+  if(kind==='ai-first'){ phase='human'; render(); }
+  else finishTurn();
+}
+function afterHumanAction(actionText){
+  ui.staged=null;
+  if(actionText) addLog(HUMAN,actionText);
+  render();
+  if(st.turn%2===1){ phase='ai'; scheduleAI('ai-second'); render(); }
+  else finishTurn();
+}
+function finishTurn(){
+  // scheduled end-of-turn events
+  if(st.turn===5){
+    for(const r of RELAY_IDS){const w=st.worlds[r]; w.E=Math.min(5,w.E+1); w.I=Math.min(5,w.I+1);}
+    addLog('event','Relay awakening — both relays gain +1 Economy & +1 Industry (cap 5). First prestige pays below.');
+  }
+  if(st.turn===10) addLog('warn','Supernova warning logged — Military income will be suppressed on turn 11.');
+  if(st.turn===15) addLog('warn','Blockade warning logged — attacks cost +8 Military on turns 16–19.');
+  if(st.turn===MAX_TURN) addLog('event','Final relay awards… the galaxy collapses into legend.');
+  awardRelayPrestige();
+  if(st.turn===MAX_TURN){ showResult(); return; }
+  st.turn++;
+  beginTurn();
+}
+
+/* human actions */
+function humanStage(type,attr){
+  if(phase!=='human'||ui.sel<0) return;
+  if(ui.staged && ui.staged.type===type && (type!=='develop'||ui.staged.attr===attr)) ui.staged=null; // toggle off
+  else ui.staged={type, attr: type==='develop' ? (attr||ui.staged?.attr||'E') : undefined};
+  render();
+}
+function humanCommit(){
+  if(phase!=='human'||!ui.staged||ui.sel<0) return;
+  const info=orderInfo(HUMAN,ui.staged.type,ui.sel,ui.staged.attr);
+  if(!info.legal) return;
+  applyOrder(HUMAN,{...ui.staged,target:ui.sel});
+  afterHumanAction(null); // applyOrder already logged the action
+}
+function humanPass(){
+  if(phase!=='human') return;
+  afterHumanAction('You pass.');
+}
+function humanSelect(id){
+  ui.sel=id;
+  render();
+}
+
+/* ==================================================================
+   6 · LOG
+   ================================================================== */
+function addLog(cls,text){
+  st.log.push({turn:st.turn,cls,text});
+  if(st.log.length>60) st.log.shift();
+}
+
+/* ==================================================================
+   7 · RENDERING
+   ================================================================== */
+const $=id=>document.getElementById(id);
+
+function render(){
+  renderTop(); renderEmpires(); renderInspector(); renderConsole(); renderForecast(); renderLog(); updateMap();
+}
+
+function renderTop(){
+  $('turnLabel').textContent=`TURN ${Math.min(st.turn,MAX_TURN)} / ${MAX_TURN}`;
+  const ticks=$('ticks'); ticks.innerHTML='';
+  for(let t=1;t<=MAX_TURN;t++){
+    const s=document.createElement('span');
+    s.title=`Turn ${t}`;
+    if(t<st.turn) s.className='done';
+    else if(t===st.turn && !st.over) s.className='cur';
+    if(t===11) s.classList.add('flare');
+    if(t>=16&&t<=19) s.classList.add('block');
+    ticks.appendChild(s);
+  }
+  const chip=$('phaseChip');
+  chip.className='';
+  if(phase==='human'){ chip.classList.add('human'); chip.textContent='YOUR MOVE'; }
+  else if(phase==='ai'){ chip.classList.add('ai'); chip.textContent='RIVAL MOVING…'; }
+  else if(phase==='over'){ chip.classList.add('over'); chip.textContent='MATCH OVER'; }
+  $('seedChip').textContent='SEED '+seedHex(st.seed);
+}
+
+function renderEmpires(){
+  const card=e=>{
+    const name=e===HUMAN?'SOLACE ACCORD':'VEX DOMINION';
+    const tag=e===HUMAN?'YOU':'RIVAL';
+    const owned=st.worlds.filter(w=>w.owner===e);
+    const E=sumAttr(e,'E'), I=sumAttr(e,'I');
+    const nextM= st.turn+1===11 ? 0 : I;
+    const flare= st.turn+1===11 ? ' <span class="warn">· flare: +0 mil</span>' : '';
+    const pv=3*owned.length+owned.reduce((s,w)=>s+w.E+w.I+w.D,0);
+    const total=pv+st.prestige[e];
+    return `<div class="ecard ${e}">
+      <div class="echead"><span class="ename">${name}</span><span class="etag">${tag}</span></div>
+      <div class="ecres">
+        <div><i>CREDITS</i><b>${st.credits[e]}</b></div>
+        <div><i>MILITARY</i><b>${st.military[e]}</b></div>
+        <div><i>WORLDS</i><b>${owned.length}</b></div>
+      </div>
+      <div class="ecinc">next turn: +${2*E} cr · +${nextM} mil${flare}</div>
+      <div class="ecscore">prestige <b>${total}</b> <span>(planets ${pv} + relays ${st.prestige[e]})</span></div>
+    </div>`;
+  };
+  $('empireCards').innerHTML=card(HUMAN)+card(AI);
+}
+
+function renderInspector(){
+  const box=$('inspector');
+  if(ui.sel<0){
+    box.innerHTML=`<div class="cardtitle">WORLD INSPECTOR</div><div class="ins-empty">Select any world on the star chart — inspection is free.</div>`;
+    return;
+  }
+  const w=st.worlds[ui.sel], id=ui.sel;
+  const ownerLine=w.owner===HUMAN?'Yours':w.owner===AI?'Rival-held':'Neutral — pays no income';
+  const role=RELAY_IDS.includes(id)?'ANCIENT RELAY':(id===HOME_IDS.H||id===HOME_IDS.A)?'HOMEWORLD':w.profile.toUpperCase();
+  const shield=w.protUntil>=st.turn?`<div class="ins-shield">Shielded through turn ${w.protUntil} · attackable on turn ${w.protUntil+1}</div>`:'';
+  const relayNote=RELAY_IDS.includes(id)?`<div class="ins-relay">Banked relay — +2 prestige per held turn (turns 5–20).</div>`:'';
+  box.innerHTML=`<div class="cardtitle">WORLD INSPECTOR</div>
+    <div class="ins-head"><span class="ins-num">${dispId(id)}</span><span class="ins-name">${w.name}</span><span class="ins-role">${role}</span></div>
+    <div class="ins-owner ${w.owner||'N'}">${ownerLine}</div>
+    <div class="ins-levels">
+      <div><i>ECONOMY</i><b>${w.E}</b></div><div><i>INDUSTRY</i><b>${w.I}</b></div><div><i>DEFENSE</i><b>${w.D}</b></div>
+    </div>
+    <div class="ins-prod">Produces +${2*w.E} Credits · +${w.I} Military per turn${w.owner?'':' (while neutral)'}</div>
+    ${shield}${relayNote}
+    <div class="ins-lanes">Lanes → ${NEIGHBORS[id].map(n=>`${dispId(n)} ${st.worlds[n].name}`).join(' · ')}</div>
+    <div class="ins-value">End-score value if held: ${3+w.E+w.I+w.D} (3 base + ${w.E+w.I+w.D} levels)</div>`;
+}
+
+function costShort(type,info){
+  if(type==='expand')  return info.cost?`${info.cost.c} CR`:'—';
+  if(type==='develop') return '8 CR';
+  return info.cost?`8 CR + ${info.cost.m} MIL`:'—';
+}
+function effectText(order,info){
+  const w=st.worlds[ui.sel], d=dispId(ui.sel);
+  if(order.type==='expand')
+    return `Pay ${info.cost.c} Credits → ${d} ${w.name} joins your empire with E${w.E} I${w.I} D${w.D} intact. From next turn: +${2*w.E} cr, +${w.I} mil income.`;
+  if(order.type==='develop'){
+    const a=order.attr;
+    const gain=a==='E'?'+2 Credits income':a==='I'?'+1 Military income':'raises its capture cost by +6 Military';
+    return `Pay ${DEVELOP_COST} Credits → ${ATTRS[a].label} ${w[a]}→${w[a]+1} on ${d} ${w.name}. From next turn: ${gain}.`;
+  }
+  const sur=blockadeAt(st.turn)?` (includes ${BLOCKADE_EXTRA} blockade surcharge)`:'';
+  return `Pay ${ATTACK_CREDITS} Credits + ${info.cost.m} Military${sur} → capture ${d} ${w.name}, attributes intact. Shielded through turn ${st.turn+1}, attackable turn ${st.turn+2}.`;
+}
+function renderConsole(){
+  const box=$('console');
+  const types=[['expand','EXPAND'],['develop','DEVELOP'],['attack','ATTACK']];
+  if(phase!=='human'){
+    const msg=st.over?'Match complete.':'Rival is moving…';
+    box.innerHTML=`<div class="cardtitle">ORDER CONSOLE</div>
+      <div class="ctarget">${msg}</div>
+      ${types.map(t=>`<button class="obtn" disabled><span class="on">${t[1]}</span><span class="oc">—</span></button>`).join('')}
+      <div class="preview muted">${st.over?'See the result overlay.':'Waiting for the rival\u2019s order…'}</div>
+      <div class="actions">
+        <button id="commitBtn" disabled>COMMIT</button>
+        <button id="passBtn" disabled>PASS</button>
+      </div>`;
+    return;
+  }
+  if(ui.sel<0){
+    box.innerHTML=`<div class="cardtitle">ORDER CONSOLE</div>
+      <div class="ctarget">Select a world on the chart</div>
+      ${types.map(t=>`<button class="obtn" disabled><span class="on">${t[1]}</span><span class="oc">no target</span></button>`).join('')}
+      <div class="preview muted">Selection is free — nothing is spent until you commit. Pass is always available.</div>
+      <div class="actions">
+        <button id="commitBtn" disabled>COMMIT</button>
+        <button id="passBtn">PASS TURN</button>
+      </div>`;
+    return;
+  }
+  const w=st.worlds[ui.sel], d=dispId(ui.sel);
+  const ownerWord=w.owner===HUMAN?'yours':w.owner===AI?'rival-held':'neutral';
+  let html=`<div class="cardtitle">ORDER CONSOLE</div>
+    <div class="ctarget">→ <b>${d} ${w.name}</b> · ${ownerWord}</div><div class="orderbtns">`;
+  for(const [k,label] of types){
+    const info=orderInfo(HUMAN,k,ui.sel,ui.staged&&ui.staged.type==='develop'?ui.staged.attr:'E');
+    const active=ui.staged&&ui.staged.type===k;
+    html+=`<button class="obtn${active?' active':''}" data-type="${k}" ${info.legal?'':'disabled'}>
+      <span class="on">${label}</span><span class="oc">${costShort(k,info)}</span>
+      ${info.legal?'':`<span class="reason">✕ ${info.reason}</span>`}</button>`;
+  }
+  html+=`</div>`;
+  if(ui.staged&&ui.staged.type==='develop'){
+    const row=['E','I','D'].map(a=>{
+      const lvl=w[a], dis=w.owner!==HUMAN||lvl>=5, act=ui.staged.attr===a;
+      return `<button class="abtn${act?' active':''}" data-attr="${a}" ${dis?'disabled':''}>
+        <b>${ATTRS[a].label}</b><span>${lvl}→${Math.min(5,lvl+1)}</span></button>`;
+    }).join('');
+    html+=`<div class="attrrow"><div class="arlabel">RAISE ONE ATTRIBUTE · ${DEVELOP_COST} CREDITS</div><div class="arbtns">${row}</div></div>`;
+  }
+  if(ui.staged){
+    const info=orderInfo(HUMAN,ui.staged.type,ui.sel,ui.staged.attr);
+    html+= info.legal
+      ? `<div class="preview ok">▸ ${effectText(ui.staged,info)}</div>`
+      : `<div class="preview bad">✕ ${info.reason}</div>`;
+  }else{
+    html+=`<div class="preview muted">Stage Expand, Develop, or Attack. Changing selection retargets the staged order — nothing is spent until commit.</div>`;
+  }
+  const commitDis=!ui.staged||!orderInfo(HUMAN,ui.staged.type,ui.sel,ui.staged.attr).legal;
+  html+=`<div class="actions">
+    <button id="commitBtn" ${commitDis?'disabled':''}>COMMIT</button>
+    <button id="passBtn">PASS TURN</button></div>`;
+  box.innerHTML=html;
+}
+
+/* scheduled beats */
+const BEATS=[
+  {turn:5, when:'END OF TURN 5', title:'Relay Awakening', text:'+1 Economy & +1 Industry to both relays (cap 5) · first prestige: +2 per held relay'},
+  {turn:10, when:'END OF TURN 10', title:'Supernova Warning', text:'Forecast logged — turn 11 pays no Military income'},
+  {turn:11, when:'TURN 11', title:'Solar Flare', text:'Military income zero for both empires · Credits unaffected'},
+  {turn:15, when:'END OF TURN 15', title:'Blockade Warning', text:'Forecast logged — attacks cost +8 Military on turns 16–19'},
+  {turn:16, when:'TURNS 16–19', title:'Blockade', text:'Every attack costs +8 Military · lifts before turn 20'},
+  {turn:20, when:'END OF TURN 20', title:'Final Awards & Collapse', text:'Last relay prestige (+2 per held relay), then the galaxy is scored'},
+];
+function renderForecast(){
+  const chips=[];
+  if(st.turn===11) chips.push(`<div class="achip flare">SOLAR FLARE ACTIVE — MILITARY INCOME 0 THIS TURN</div>`);
+  if(blockadeAt(st.turn)) chips.push(`<div class="achip block">BLOCKADE ACTIVE — ATTACKS COST +${BLOCKADE_EXTRA} MILITARY</div>`);
+  const rows=BEATS.map(b=>{
+    let state;
+    if(b.turn===16)      state = st.turn>19?'done': st.turn>=16?'active':'future';
+    else if(b.turn===11) state = st.turn>11?'done': st.turn===11?'active':'future';
+    else                 state = st.turn>b.turn?'done':'future';
+    return {b,state};
+  });
+  const ni=rows.findIndex(r=>r.state==='future');
+  if(ni>=0) rows[ni].state='next';
+  $('forecast').innerHTML=`<div class="cardtitle">EVENT TIMELINE</div>
+    ${chips.length?`<div class="activechips">${chips.join('')}</div>`:''}
+    <div class="beats">${rows.map(r=>`
+      <div class="beat ${r.state}">
+        <div class="bt">${r.b.when}</div>
+        <div class="bb"><b>${r.b.title}</b> — ${r.b.text}</div>
+      </div>`).join('')}</div>`;
+}
+
+function renderLog(){
+  $('logList').innerHTML=st.log.slice().reverse().map(l=>
+    `<div class="li ${l.cls}"><span class="lt">T${l.turn}</span>${l.text}</div>`).join('');
+}
+
+/* ==================================================================
+   8 · STAR MAP (SVG)
+   ================================================================== */
+const SVGNS='http://www.w3.org/2000/svg';
+let nodeEls=[], laneEls=[];
+
+function hexPath(r){
+  const p=[];
+  for(let i=0;i<6;i++){const a=Math.PI/180*(60*i-30); p.push((r*Math.cos(a)).toFixed(1)+','+(r*Math.sin(a)).toFixed(1));}
+  return 'M'+p.join('L')+'Z';
+}
+function buildMapStatic(){
+  // deterministic starfield from the seed
+  const rng=mulberry32((st.seed^0x9e3779b9)>>>0);
+  let stars='';
+  for(let i=0;i<120;i++){
+    const x=(rng()*1000).toFixed(1), y=(rng()*740).toFixed(1), r=(rng()*1.3+0.3).toFixed(2), o=(rng()*0.5+0.12).toFixed(2);
+    stars+=`<circle cx="${x}" cy="${y}" r="${r}" fill="#cfe1ff" opacity="${o}"/>`;
+  }
+  $('stars').innerHTML=stars;
+  const lg=$('lanes'); lg.innerHTML=''; laneEls=[];
+  for(const [a,b] of LANES){
+    const el=document.createElementNS(SVGNS,'line');
+    el.setAttribute('x1',POS[a][0]); el.setAttribute('y1',POS[a][1]);
+    el.setAttribute('x2',POS[b][0]); el.setAttribute('y2',POS[b][1]);
+    el.dataset.a=a; el.dataset.b=b;
+    lg.appendChild(el); laneEls.push(el);
+  }
+  const ng=$('nodes'); ng.innerHTML=''; nodeEls=[];
+  for(let id=0;id<20;id++){
+    const g=document.createElementNS(SVGNS,'g');
+    g.setAttribute('class','node'+(RELAY_IDS.includes(id)?' relay':''));
+    g.dataset.id=id; g.tabIndex=0; g.setAttribute('role','button');
+    g.setAttribute('transform',`translate(${POS[id][0]},${POS[id][1]})`);
+    const body=RELAY_IDS.includes(id)
+      ?`<path class="body" d="${hexPath(29)}"/>`
+      :`<circle class="body" r="26"/>`;
+    g.innerHTML=`<circle class="halo" r="37"/><circle class="prot" r="33"/>${body}
+      <text class="tag" y="-36"></text><text class="sh" y="-48"></text>
+      <text class="num" y="6"></text><text class="nm" y="55"></text><text class="st" y="70"></text>`;
+    g.addEventListener('click',()=>humanSelect(id));
+    g.addEventListener('focus',()=>humanSelect(id));
+    g.addEventListener('keydown',ev=>{
+      const map={ArrowLeft:-1,ArrowRight:1,ArrowUp:-5,ArrowDown:5};
+      if(ev.key in map){
+        ev.preventDefault();
+        const t=id+map[ev.key];
+        if(t>=0&&t<20) nodeEls[t].focus();
+      }
+    });
+    ng.appendChild(g); nodeEls.push(g);
+  }
+}
+function updateMap(){
+  const stagedType=(phase==='human'&&ui.staged)?ui.staged.type:null;
+  let legal=null;
+  if(stagedType){
+    legal=new Set();
+    for(let id=0;id<20;id++) if(orderInfo(HUMAN,stagedType,id,ui.staged.attr).legal) legal.add(id);
+  }
+  for(let id=0;id<20;id++){
+    const g=nodeEls[id], w=st.worlds[id];
+    g.dataset.owner=w.owner||'N';
+    g.classList.toggle('sel',ui.sel===id);
+    g.classList.toggle('legal',!!(legal&&legal.has(id)&&id!==ui.sel));
+    const isPend=stagedType&&ui.sel===id;
+    g.classList.toggle('pend',!!(isPend&&legal.has(id)));
+    g.classList.toggle('pendBad',!!(isPend&&!legal.has(id)));
+    g.classList.toggle('prot',w.protUntil>=st.turn);
+    g.querySelector('.tag').textContent=(id===HOME_IDS.H||id===HOME_IDS.A)?'HOME':RELAY_IDS.includes(id)?'RELAY':'';
+    g.querySelector('.num').textContent=dispId(id);
+    g.querySelector('.nm').textContent=w.name;
+    g.querySelector('.st').textContent=`E${w.E}·I${w.I}·D${w.D}`;
+    g.querySelector('.sh').textContent=w.protUntil>=st.turn?'◆ '+w.protUntil:'';
+    g.setAttribute('aria-label',
+      `World ${dispId(id)} ${w.name}: ${w.owner===HUMAN?'yours':w.owner===AI?'rival-held':'neutral'}, `+
+      `Economy ${w.E}, Industry ${w.I}, Defense ${w.D}`+
+      (w.protUntil>=st.turn?`, shielded through turn ${w.protUntil}`:''));
+  }
+  for(const el of laneEls){
+    const a=+el.dataset.a, b=+el.dataset.b;
+    let cls='lane'+(isRelayLane(a,b)?' relaylane':'');
+    if(stagedType){
+      const pendOK=ui.sel>=0&&legal.has(ui.sel);
+      const touchesPend=pendOK&&(ui.sel===a||ui.sel===b);
+      const touchesLegal=legal.has(a)||legal.has(b);
+      const touchesSel=ui.sel===a||ui.sel===b;
+      if(touchesPend) cls+=' hl2';
+      else if(touchesLegal||touchesSel) cls+=' hl1';
+      else cls+=' dim';
+    }else if(ui.sel===a||ui.sel===b) cls+=' hl1';
+    el.setAttribute('class',cls);
+  }
+}
+
+/* ==================================================================
+   9 · OVERLAYS
+   ================================================================== */
+function hideOverlays(){ $('intro').classList.add('hidden'); $('result').classList.add('hidden'); }
+
+function showResult(){
+  st.over=true; phase='over'; ui.staged=null;
+  const sH=getScore(HUMAN), sA=getScore(AI);
+  const banner=$('resBanner'), sub=$('resSub');
+  banner.className='resbanner';
+  if(st.endReason==='elim'){
+    const w=st.winner;
+    if(w===HUMAN){ banner.classList.add('win'); banner.textContent='VICTORY'; sub.textContent=`You eliminated the Vex Dominion on turn ${st.elimTurn}.`; }
+    else{ banner.classList.add('lose'); banner.textContent='DEFEAT'; sub.textContent=`The Vex Dominion overran your last world on turn ${st.elimTurn}.`; }
+  }else if(sH.total>sA.total){ banner.classList.add('win'); banner.textContent='VICTORY'; sub.textContent=`You outscore the Vex Dominion ${sH.total} to ${sA.total} after ${MAX_TURN} turns.`; }
+  else if(sA.total>sH.total){ banner.classList.add('lose'); banner.textContent='DEFEAT'; sub.textContent=`The Vex Dominion outscored you ${sA.total} to ${sH.total} after ${MAX_TURN} turns.`; }
+  else{ banner.classList.add('draw'); banner.textContent='STALEMATE'; sub.textContent=`Both empires finish level at ${sH.total} prestige.`; }
+  $('resTable').innerHTML=`
+    <tr><th>SCORE BREAKDOWN</th><th>YOU</th><th>RIVAL</th></tr>
+    <tr><td>Worlds held</td><td class="H">${sH.worlds}</td><td class="A">${sA.worlds}</td></tr>
+    <tr><td>Planet value (3 × worlds + levels)</td><td class="H">${sH.pv}</td><td class="A">${sA.pv}</td></tr>
+    <tr><td>Banked relay prestige</td><td class="H">${sH.relay}</td><td class="A">${sA.relay}</td></tr>
+    <tr class="total"><td>TOTAL PRESTIGE</td><td class="H">${sH.total}</td><td class="A">${sA.total}</td></tr>`;
+  $('resSeed').textContent='SEED '+seedHex(st.seed);
+  render();
+  $('result').classList.remove('hidden');
+}
+
+/* ==================================================================
+   10 · WIRING & INIT
+   ================================================================== */
+$('console').addEventListener('click',ev=>{
+  const ob=ev.target.closest('.obtn');
+  if(ob&&ob.dataset.type){ humanStage(ob.dataset.type); return; }
+  const ab=ev.target.closest('.abtn');
+  if(ab&&ab.dataset.attr&&ui.staged){ ui.staged.attr=ab.dataset.attr; render(); return; }
+  if(ev.target.id==='commitBtn') humanCommit();
+  if(ev.target.id==='passBtn') humanPass();
+});
+document.addEventListener('keydown',ev=>{
+  if(ev.key==='Escape'&&phase==='human'&&ui.staged){ ui.staged=null; render(); }
+});
+$('startBtn').addEventListener('click',()=>{
+  const v=parseInt($('seedInput').value,10);
+  newGame(Number.isFinite(v)?v>>>0:(Math.random()*4294967296)>>>0);
+});
+$('rerollBtn').addEventListener('click',()=>{
+  $('seedInput').value=String((Math.random()*4294967296)>>>0);
+});
+$('replayBtn').addEventListener('click',()=>{ if(lastSeed!==null) newGame(lastSeed); });
+$('newBtn').addEventListener('click',()=>{ newGame((Math.random()*4294967296)>>>0); });
+
+/* test hooks (harmless in play; used by automated checks) */
+window.G={
+  get st(){return st}, get ui(){return ui}, get phase(){return phase},
+  newGame, orderInfo:(e,t,id,a)=>orderInfo(e,t,id,a), aiChoose, applyOrder, getScore,
+  processPending, beginTurn, finishTurn,
+  select:id=>humanSelect(id),
+  stage:(t,a)=>humanStage(t,a),
+  commit:()=>humanCommit(),
+  pass:()=>humanPass(),
+};
+
+/* intro */
+$('seedInput').value=String((Math.random()*4294967296)>>>0);
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Void Empires — Blitz</title>
+<meta name="description" content="A 20-turn duel for a dying galaxy. Expand, develop, conquer — and hold the ancient relays.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="stars" aria-hidden="true"></canvas>
+<div class="nebula nebula-a" aria-hidden="true"></div>
+<div class="nebula nebula-b" aria-hidden="true"></div>
+
+<div id="app">
+  <header id="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <span class="brand-name">Void Empires <em>Blitz</em></span>
+    </div>
+    <div id="turnbox" role="status" aria-live="polite"></div>
+    <div class="topbar-right">
+      <span id="seedlabel" class="seed"></span>
+      <button id="helpbtn" class="ghost-btn" type="button">Briefing</button>
+    </div>
+  </header>
+
+  <main id="layout">
+    <section id="mapwrap" aria-label="Galaxy map">
+      <svg id="lanes" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+      <div id="worlds"></div>
+      <div id="phasebanner" aria-live="polite"></div>
+      <div id="maplegend" aria-hidden="true"></div>
+    </section>
+
+    <aside id="side">
+      <section class="panel" id="empires" aria-label="Empire status"></section>
+      <section class="panel" id="composer" aria-label="Order composer"></section>
+      <section class="panel" id="inspector" aria-label="Selected world"></section>
+      <section class="panel" id="events" aria-label="Event forecast"></section>
+      <section class="panel" id="logpanel" aria-label="Recent actions">
+        <h3 class="panel-title">Signals</h3>
+        <ol id="log"></ol>
+      </section>
+    </aside>
+  </main>
+</div>
+
+<div id="intro" class="modal-veil" role="dialog" aria-modal="true" aria-labelledby="intro-title">
+  <div class="modal-card intro-card">
+    <div class="modal-glyph" aria-hidden="true">✦</div>
+    <h1 id="intro-title">Void Empires <em>Blitz</em></h1>
+    <p class="lede">A dying galaxy. Twenty turns. Two empires. The stars themselves are keeping score.</p>
+    <ol class="howto">
+      <li><strong>Select a world</strong> on the star chart — every world, lane, and reserve is public.</li>
+      <li><strong>Choose an order</strong> — Expand, Develop, or Attack — and read its exact price and effect.</li>
+      <li><strong>Commit or Pass.</strong> One order per turn; on even turns the rival moves first.</li>
+    </ol>
+    <p class="relay-note">The two golden <strong>relays</strong> awaken at the end of turn 5, then bank <strong>2 prestige every turn</strong> for whoever holds them. Hold one from awakening to collapse for 32 prestige — often the whole match.</p>
+    <button id="beginbtn" class="cta" type="button">Begin the Blitz</button>
+  </div>
+</div>
+
+<div id="result" class="modal-veil hidden" role="dialog" aria-modal="true" aria-labelledby="result-title">
+  <div class="modal-card result-card" id="resultcard"></div>
+</div>
+
+<script src="logic.js"></script>
+<script src="ui.js"></script>
+</body>
+</html>
