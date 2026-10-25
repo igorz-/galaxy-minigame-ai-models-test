@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Void Empires — Blitz</title>
+  <meta name="description" content="A five-minute, deterministic space strategy duel across a twenty-world galaxy.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="sky" aria-hidden="true"></canvas>
+
+  <div class="app" id="app">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+          <circle cx="20" cy="20" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+          <ellipse cx="20" cy="20" rx="17" ry="6" fill="none" stroke="currentColor" stroke-width="1.4" transform="rotate(-24 20 20)" opacity=".7"/>
+          <circle cx="34" cy="13" r="2.2" fill="currentColor"/>
+        </svg>
+        <div>
+          <div class="brand-title">Void Empires</div>
+          <div class="brand-sub">Blitz · <span id="seedLabel">seed —</span></div>
+        </div>
+      </div>
+      <ol class="turntrack" id="turntrack" aria-label="Turn track"></ol>
+      <div class="top-actions">
+        <button class="ghost-btn" id="rulesBtn" type="button" aria-label="How to play">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7.8 7.6a2.3 2.3 0 1 1 3.3 2.1c-.7.4-1.1.8-1.1 1.6v.4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="10" cy="14.4" r="1" fill="currentColor"/></svg>
+          <span>Rules</span>
+        </button>
+        <button class="ghost-btn" id="newBtn" type="button" aria-label="Start a new galaxy">
+          <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M16 10a6 6 0 1 1-1.8-4.3M16 3.5v3.2h-3.2" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>New</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="scoreboard" aria-label="Empire status">
+      <article class="empire you" id="empHuman"></article>
+      <div class="phase" id="phase" aria-live="polite"></div>
+      <article class="empire rival" id="empAI"></article>
+    </section>
+
+    <main class="stage">
+      <section class="map-wrap" aria-label="Galaxy chart">
+        <div class="map" id="map">
+          <svg class="lanes" id="lanes" aria-hidden="true"></svg>
+          <svg class="fxsvg" id="fxsvg" aria-hidden="true"></svg>
+          <div class="worlds" id="worlds" role="group" aria-label="Worlds — use arrow keys to move between worlds"></div>
+          <div class="fx" id="fx" aria-hidden="true"></div>
+        </div>
+        <div class="legend" aria-hidden="true">
+          <span><i class="lg lg-you"></i>Yours</span>
+          <span><i class="lg lg-rival"></i>Rival</span>
+          <span><i class="lg lg-neutral"></i>Neutral</span>
+          <span><i class="lg lg-relay"></i>Relay</span>
+          <span><i class="lg lg-target"></i>Legal target</span>
+          <span><i class="lg lg-shield"></i>Protected</span>
+        </div>
+        <div class="banner" id="banner" aria-hidden="true"></div>
+        <div class="toasts" id="toasts" aria-live="polite"></div>
+      </section>
+
+      <aside class="side">
+        <section class="panel inspector" id="inspector" aria-label="Selected world"></section>
+
+        <section class="panel composer" aria-label="Order composer">
+          <header class="panel-head">
+            <h2>Orders</h2>
+            <span class="kbd-hint">keys 1–5 · C commit · P pass</span>
+          </header>
+          <div class="options" id="options" role="group" aria-label="Order type"></div>
+          <div class="preview" id="preview" aria-live="polite"></div>
+          <div class="commitbar" id="commitbar">
+            <div class="commit-summary" id="commitSummary"></div>
+            <div class="commit-buttons">
+              <button class="btn pass" id="passBtn" type="button">Pass</button>
+              <button class="btn commit" id="commitBtn" type="button" disabled>Commit order</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel events" aria-label="Events">
+          <header class="panel-head"><h2>Galactic events</h2></header>
+          <div id="events"></div>
+        </section>
+
+        <section class="panel log" aria-label="Recent actions">
+          <header class="panel-head"><h2>Captain's log</h2></header>
+          <ol id="log"></ol>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <dialog class="modal intro" id="intro" aria-labelledby="introTitle">
+    <div class="modal-art" aria-hidden="true">
+      <div class="art-planet"></div><div class="art-ring"></div><div class="art-moon"></div>
+    </div>
+    <div class="modal-body">
+      <p class="eyebrow">A twenty-turn duel</p>
+      <h1 id="introTitle">Void Empires <span>Blitz</span></h1>
+      <p class="lede">Lead the <b class="c-you">Aurora Concord</b> against the <b class="c-rival">Vulcan Hegemony</b> across a twenty-world chart. Everything is public. Nothing is random in combat. Each empire gets one order per turn.</p>
+      <ol class="steps">
+        <li><span>1</span><div><b>Select a world</b> on the chart. Selecting is free.</div></li>
+        <li><span>2</span><div><b>Choose an order</b> (Expand, Develop or Attack) and read its exact price and effect.</div></li>
+        <li><span>3</span><div><b>Commit</b> the order or <b>Pass</b>. You move first on odd turns, the rival on even turns.</div></li>
+      </ol>
+      <div class="intro-grid">
+        <div class="intro-card relay-card">
+          <h3>The Meridian relays</h3>
+          <p>Worlds <b>08</b> and <b>13</b> awaken at the <b>end of turn 5</b> and gain +1 Economy and +1 Industry. From then through turn 20, each relay pays its holder <b>2 prestige</b> at the end of every turn. Banked prestige stays banked.</p>
+        </div>
+        <div class="intro-card">
+          <h3>Scheduled events</h3>
+          <p><b>Turn 11</b>: Supernova. No Military income.<br><b>Turns 16–19</b>: Blockade. Attacks cost +8 Military.<br><b>Turn 20</b>: Collapse. Final score.</p>
+        </div>
+        <div class="intro-card">
+          <h3>Victory</h3>
+          <p>Take the rival's last world, or hold more prestige after turn 20: <b>3 per world + every E/I/D level + relay prestige</b>.</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn commit big" id="startBtn" type="button">Take command</button>
+        <span class="seed-note">Galaxy seed <code id="introSeed"></code></span>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="modal result" id="result" aria-labelledby="resultTitle">
+    <div class="modal-body">
+      <p class="eyebrow" id="resultEyebrow"></p>
+      <h1 id="resultTitle"></h1>
+      <p class="lede" id="resultLede"></p>
+      <div class="result-table" id="resultTable"></div>
+      <div class="modal-actions">
+        <button class="btn commit big" id="newGalaxyBtn" type="button">New Galaxy</button>
+        <button class="btn pass big" id="replayBtn" type="button">Replay Seed</button>
+        <button class="btn link" id="viewBtn" type="button">View final chart</button>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="engine.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>
