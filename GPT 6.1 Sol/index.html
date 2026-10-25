@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0a0e10" />
+    <meta
+      name="description"
+      content="A small galaxy. Twenty turns. One empire to remember. A deterministic single-player space strategy game."
+    />
+    <title>Void Empires — Blitz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=DM+Sans:wght@400;450;500;550;600;650;700&family=IBM+Plex+Mono:wght@400;450;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./src/style.css" />
+    <script type="module" src="./src/main.js"></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <a class="wordmark" href="./"
+        ><span class="brand-symbol" aria-hidden="true">✳</span
+        ><span
+          >VOID EMPIRES<span class="brand-edition"
+            >BLITZ / STRATEGY IN THE STARS</span
+          ></span
+        ></a
+      >
+      <nav aria-label="Main navigation">
+        <span class="nav-current"><span class="live-dot"></span> GALAXY</span
+        ><button id="manual-button">FIELD MANUAL <span>↗</span></button>
+      </nav>
+      <div class="header-actions">
+        <button
+          class="mobile-help icon-button"
+          id="mobile-manual-button"
+          aria-label="Open field manual"
+        >
+          ?</button
+        ><button
+          class="icon-button"
+          id="sound-button"
+          aria-label="Enable sound"
+          aria-pressed="false"
+          title="Toggle interface sound"
+        >
+          ♪<span class="sound-off">/</span></button
+        ><button class="outline-button" id="new-button">
+          NEW GALAXY <span>↗</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="page-heading">
+        <div>
+          <div class="eyebrow">
+            <span class="tiny-cross">+</span> A SMALL GALAXY. AN ENDURING
+            EMPIRE.
+          </div>
+          <h1>The frontier awaits<span>.</span></h1>
+        </div>
+        <div class="turn-panel">
+          <div class="turn-label">
+            SHARED TURN <span id="initiative-label">YOU HAVE INITIATIVE</span>
+          </div>
+          <div class="turn-numbers">
+            <strong id="turn-number">01</strong><span>/ 20</span>
+            <div class="turn-track" id="turn-track" aria-hidden="true"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="empire-strip" aria-label="Empire status">
+        <article class="empire-status human" id="human-status"></article>
+        <div class="versus-mark" aria-hidden="true">VS</div>
+        <article class="empire-status rival" id="ai-status"></article>
+      </section>
+
+      <section class="briefing" id="briefing" aria-label="Mission briefing">
+        <span class="briefing-mark">✳</span>
+        <div>
+          <strong>Your empire starts here.</strong>
+          <p>
+            Select a world <span>→</span> choose an order <span>→</span> commit.
+            Secure ancient relays: they bank prestige from turn 5. Outscore your
+            rival in 20 turns.
+          </p>
+        </div>
+        <button id="begin-button">LET’S EXPLORE <span>↗</span></button>
+      </section>
+
+      <div class="play-layout">
+        <section class="galaxy-column" aria-label="Galaxy and intelligence">
+          <div class="map-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="section-index">01 /</span> GALAXY CHART
+                <span class="map-region">PERSEUS REACH</span>
+              </div>
+              <span class="map-live"
+                ><span class="live-dot"></span> ALL SYSTEMS VISIBLE</span
+              >
+            </div>
+            <div
+              class="galaxy-map"
+              id="galaxy-map"
+              role="group"
+              aria-label="Galaxy chart. Select a world to inspect it."
+            >
+              <div class="map-vignette"></div>
+              <div class="map-coordinate coord-nw">
+                RA 04h 28m<br />DEC +38° 12′
+              </div>
+              <div class="map-coordinate coord-se">
+                20 SYSTEMS<br />23 STAR LANES
+              </div>
+              <svg
+                id="lanes"
+                viewBox="0 0 1000 650"
+                preserveAspectRatio="none"
+                aria-hidden="true"
+              ></svg>
+              <div id="worlds"></div>
+              <div class="map-axis" aria-hidden="true">
+                <span>N</span
+                ><svg viewBox="0 0 44 44">
+                  <path d="M22 2v40M2 22h40M22 6l-4 8h8z" />
+                </svg>
+              </div>
+            </div>
+            <div class="map-footer">
+              <div class="map-legend">
+                <span><i class="legend-human"></i> YOUR WORLD</span
+                ><span><i class="legend-rival"></i> RIVAL</span
+                ><span><i class="legend-neutral"></i> NEUTRAL</span
+                ><span><i class="legend-relay">◇</i> RELAY</span
+                ><span><i class="legend-legal">+</i> LEGAL TARGET</span>
+              </div>
+              <span class="map-hint">SELECT A WORLD TO COMMAND</span>
+            </div>
+          </div>
+          <div class="intel-grid">
+            <section class="forecast-panel">
+              <div class="small-heading">
+                <span class="section-index">02 /</span> COSMIC FORECAST
+                <span id="event-time"></span>
+              </div>
+              <div id="forecast-content"></div>
+            </section>
+            <section class="activity-panel">
+              <div class="small-heading">
+                <span class="section-index">03 /</span> TRANSMISSION LOG
+                <span class="live-dot"></span>
+              </div>
+              <div
+                id="activity"
+                role="log"
+                aria-label="Recent actions"
+                aria-live="polite"
+              ></div>
+              <button class="text-button" id="log-button">
+                VIEW FULL TRANSMISSION LOG <span>↗</span>
+              </button>
+            </section>
+          </div>
+        </section>
+
+        <aside
+          class="command-panel"
+          aria-label="Selected world and order composer"
+        >
+          <div class="panel-heading">
+            <div>
+              <span class="section-index">04 /</span> WORLD INTELLIGENCE
+            </div>
+            <span id="selected-number">SYS 06</span>
+          </div>
+          <div id="inspector"></div>
+          <section class="order-composer" aria-label="Order composer">
+            <div class="small-heading">
+              ISSUE AN ORDER <span>ONE PER TURN</span>
+            </div>
+            <div class="order-tabs" role="group" aria-label="Order type">
+              <button data-order="expand" aria-pressed="false">
+                <span>⊕</span>Expand</button
+              ><button data-order="develop" aria-pressed="false">
+                <span>⌁</span>Develop</button
+              ><button data-order="attack" aria-pressed="false">
+                <span>⌖</span>Attack
+              </button>
+            </div>
+            <div
+              id="attribute-controls"
+              class="attribute-controls"
+              hidden
+              role="group"
+              aria-label="Development attribute"
+            ></div>
+            <div
+              class="order-preview"
+              id="order-preview"
+              aria-live="polite"
+            ></div>
+            <div class="commit-row">
+              <button id="commit-button" class="primary-button" disabled>
+                COMMIT ORDER <span>↗</span></button
+              ><button id="pass-button" class="pass-button">
+                PASS <span>→</span>
+              </button>
+            </div>
+            <p class="command-note" id="command-note">
+              Orders resolve immediately. No second confirmation.
+            </p>
+          </section>
+          <div class="relay-objective">
+            <span class="objective-icon">◇</span>
+            <div>
+              <strong>Control the signal. Claim the galaxy.</strong>
+              <p>
+                Each relay earns +2 prestige per turn from turn 5. Reserves
+                don’t count toward victory.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+      <footer class="site-footer">
+        <span>VOID EMPIRES <span class="footer-slash">/</span> BLITZ</span
+        ><span id="seed-label"></span><span>NO LUCK. JUST YOUR NEXT MOVE.</span>
+      </footer>
+    </main>
+    <div class="toast" id="toast" role="status" hidden></div>
+    <dialog id="modal"><div id="modal-content"></div></dialog>
+  </body>
+</html>
