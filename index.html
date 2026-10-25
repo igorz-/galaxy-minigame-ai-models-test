@@ -70,8 +70,9 @@
     .price-high { --price-color: #f2a6a0; --price-bg: #4d2c32; --price-border: #bb7379; }
     .price-amount, .metric.cost.price-low .metric-value, .metric.cost.price-mid .metric-value, .metric.cost.price-high .metric-value { color: var(--price-color); }
     .price-badge { display: inline-flex; align-items: center; margin-left: 7px; padding: 2px 6px; border: 1px solid var(--price-border); border-radius: 999px; background: var(--price-bg); color: var(--price-color); font-size: 10px; font-weight: 700; line-height: 1.2; letter-spacing: 0; white-space: nowrap; vertical-align: middle; }
-    .table-preview { display: block; width: 76px; aspect-ratio: 16 / 10; padding: 0; overflow: hidden; border: 1px solid #ffffff30; border-radius: 4px; background: #080b15; cursor: zoom-in; }
+    .table-preview { display: block; position: relative; width: 76px; aspect-ratio: 16 / 10; padding: 0; overflow: hidden; border: 1px solid #ffffff30; border-radius: 4px; background: #080b15; cursor: zoom-in; }
     .table-preview img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: top center; }
+    .table-preview::after, .mobile-thumb::after { content: "Expand"; position: absolute; right: 3px; bottom: 3px; padding: 2px 4px; border: 1px solid #ffffff70; border-radius: 3px; background: #080b15e8; color: #fff; font-size: 9px; font-weight: 700; line-height: 1.2; pointer-events: none; }
     .table-preview:hover { border-color: #dfb783; }
     .game-table .table-launch { color: #ebc391; text-decoration: none; font-weight: 650; white-space: nowrap; }
     .game-table .table-launch:hover { color: #fff0d7; }
@@ -84,8 +85,7 @@
     .preview { display: block; width: calc(100% - 20px); margin: 0 10px; padding: 0; background: #080b15; border: 1px solid #ffffff24; border-radius: 7px; overflow: hidden; cursor: zoom-in; position: relative; aspect-ratio: 16 / 10; }
     .preview img { width: 100%; height: 100%; display: block; object-fit: contain; object-position: top center; transition: transform .35s, filter .35s; }
     .preview:hover img, .preview:focus-visible img { transform: scale(1.035); filter: brightness(.72); }
-    .zoom-label { position: absolute; inset: auto 12px 12px auto; padding: 8px 10px; border: 1px solid #ffffff4a; border-radius: 5px; background: #090b15d9; color: white; font-size: 11px; font-weight: 650; letter-spacing: .04em; opacity: 0; transform: translateY(5px); transition: opacity .2s, transform .2s; }
-    .preview:hover .zoom-label, .preview:focus-visible .zoom-label { opacity: 1; transform: none; }
+    .zoom-label { position: absolute; inset: auto 12px 12px auto; padding: 8px 10px; border: 1px solid #ffffff4a; border-radius: 5px; background: #090b15d9; color: white; font-size: 11px; font-weight: 650; letter-spacing: .04em; }
     .visual-review { margin: 16px 21px 0; padding: 13px 14px; border: 1px solid #dfb78340; border-radius: 7px; background: linear-gradient(120deg, #dfb7830d, #b89ad708); }
     .visual-score { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
     .visual-score .metric-label { color: #cfbb9e; }
@@ -158,7 +158,7 @@
       .mobile-card-top { grid-area: head; display: flex; align-items: baseline; gap: 10px; min-width: 0; }
       .mobile-card .rank { color: #dfb783; font-weight: 700; font-variant-numeric: tabular-nums; }
       .mobile-card .model-cell { min-width: 0; color: #e0dce5; font-size: 15px; font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; }
-      .mobile-thumb { grid-area: thumb; width: 76px; aspect-ratio: 16 / 10; padding: 0; overflow: hidden; border: 1px solid #ffffff30; border-radius: 5px; background: #080b15; cursor: zoom-in; }
+      .mobile-thumb { grid-area: thumb; position: relative; width: 76px; aspect-ratio: 16 / 10; padding: 0; overflow: hidden; border: 1px solid #ffffff30; border-radius: 5px; background: #080b15; cursor: zoom-in; }
       .mobile-thumb img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: top center; }
       .mobile-stats { grid-area: stats; display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 0; }
       .mobile-stats dt { color: #8990a0; font: 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; }
@@ -180,7 +180,6 @@
       .game-table th button { min-height: 36px; }
       .rubric summary, .visual-review summary { padding: 7px 0; }
       .launch, .table-launch { display: inline-flex; align-items: center; min-height: 44px; }
-      .zoom-label { opacity: 1; transform: none; }
       .lightbox-actions button, .lightbox-actions a { width: 44px; min-width: 44px; height: 44px; }
     }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0s !important; } }
@@ -194,7 +193,7 @@
     </header>
     <main>
       <section aria-label="Model gallery">
-        <p class="gallery-intro">Eleven AI models built the same mini strategy game from one shared prompt.</p>
+        <p class="gallery-intro">Eleven AI models built the same mini strategy game from one shared prompt. For the best experience, open the games in a desktop browser.</p>
         <div class="gallery-head"><div class="gallery-controls"><span class="count">11 / 11 models</span><label class="ranking-toggle" title="GPT-6 Astra’s subjective visual scores. Rank combines visual score with reported price."><span>Astra ranking</span><input type="checkbox" id="rankingToggle" aria-label="Show GPT-6 Astra’s visual ranking"></label><div class="view-switch" role="group" aria-label="Gallery view"><button type="button" id="tableView" aria-pressed="true" aria-controls="tableViewPanel">Table</button><button type="button" id="gridView" aria-pressed="false" aria-controls="gallery">Cards</button></div></div></div>
         <details class="rubric ranking-only" id="visual-rubric">
           <summary>How GPT-6 Astra (AI) scored and ranked these games</summary>
