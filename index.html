@@ -44,7 +44,9 @@
     .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; padding-bottom: 95px; }
     [hidden] { display: none !important; }
     .table-note { margin: -4px 0 12px; color: #a9a7b5; font-size: 12px; line-height: 1.5; }
+    .sort-hint-narrow { display: none; }
     .table-wrap { overflow-x: auto; margin-bottom: 95px; border: 1px solid #ffffff22; border-radius: 10px; background: #121622; }
+    .mobile-sort, .mobile-list { display: none; }
     .game-table { width: 100%; min-width: 700px; border-collapse: collapse; font-size: 13px; font-variant-numeric: tabular-nums; }
     .game-table th { padding: 10px 12px; border-bottom: 1px solid #ffffff28; color: #aaaab8; font: 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .1em; text-align: left; text-transform: uppercase; white-space: nowrap; }
     .game-table th.numeric, .game-table td.numeric { text-align: right; }
@@ -104,17 +106,60 @@
     .launch:hover { color: #fff0d7; }
     .launch svg { width: 14px; height: 14px; }
     .footer { display: flex; justify-content: space-between; gap: 20px; padding: 23px 0 35px; border-top: 1px solid #ffffff20; color: #7d8190; font-size: 10px; }
-    dialog { width: min(96vw, 1500px); max-height: 96vh; padding: 0; border: 1px solid #d9b78475; border-radius: 12px; background: #0e121c; color: #f4eef1; box-shadow: 0 30px 100px #000c; overflow: hidden; }
-    dialog::backdrop { background: #03050bdf; backdrop-filter: blur(9px); }
-    .lightbox-bar { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 13px 16px 13px 22px; border-bottom: 1px solid #ffffff20; }
-    .lightbox-title { font-size: 15px; font-weight: 700; }
-    .lightbox-actions { display: flex; align-items: center; gap: 8px; }
+    dialog { width: min(96vw, 1500px); max-width: 96vw; max-height: 96vh; max-height: 96dvh; padding: 0; border: 1px solid #d9b78475; border-radius: 12px; background: #0e121c; color: #f4eef1; box-shadow: 0 30px 100px #000c; overflow: hidden; overscroll-behavior: contain; }
+    dialog[open] { display: flex; flex-direction: column; }
+    dialog::backdrop { background: #03050bdf; -webkit-backdrop-filter: blur(9px); backdrop-filter: blur(9px); }
+    .lightbox-bar { display: flex; align-items: center; justify-content: space-between; gap: 15px; padding: 13px 16px 13px 22px; border-bottom: 1px solid #ffffff20; flex: 0 0 auto; }
+    .lightbox-title { min-width: 0; flex: 1 1 auto; overflow: hidden; font-size: 15px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+    .lightbox-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
     .lightbox-actions button, .lightbox-actions a { min-width: 36px; height: 36px; padding: 0 10px; display: grid; place-items: center; border: 1px solid #ffffff2c; border-radius: 6px; background: #ffffff0a; color: #ece7e9; text-decoration: none; cursor: pointer; }
     .lightbox-actions button:hover, .lightbox-actions a:hover { background: #ffffff21; }
-    #fullImage { display: block; width: 100%; max-height: calc(96vh - 64px); object-fit: contain; }
+    #fullImage { display: block; width: 100%; flex: 1 1 auto; min-height: 0; max-height: none; object-fit: contain; }
     :focus-visible { outline: 2px solid #eac48f; outline-offset: 3px; }
     @media (max-width: 1050px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .orbit { opacity: .4; position: absolute; right: 0; } }
-    @media (max-width: 650px) { .shell { width: min(100% - 32px, 500px); } .masthead { padding: 20px 0; } .mast-note { display: none; } .hero { min-height: 300px; padding: 58px 0 56px; } .orbit { width: 200px; right: -70px; top: 35px; } .gallery-head { align-items: start; flex-direction: column; } .gallery-controls { width: 100%; justify-content: space-between; } .grid { grid-template-columns: 1fr; gap: 17px; padding-bottom: 60px; } .table-wrap { margin-bottom: 60px; } .card h3 { font-size: 22px; } .footer { flex-direction: column; } }
+    @media (max-width: 650px) {
+      .shell { width: min(100% - 32px, 500px); }
+      .masthead { padding: 20px 0; }
+      .mast-note { display: none; }
+      .gallery-head { align-items: start; flex-direction: column; }
+      .gallery-controls { width: 100%; justify-content: space-between; }
+      .grid { grid-template-columns: 1fr; gap: 17px; padding-bottom: 60px; }
+      .table-wrap { display: none; }
+      .sort-hint-wide { display: none; }
+      .sort-hint-narrow { display: inline; }
+      .mobile-sort { position: sticky; top: 8px; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 12px; padding: 9px 12px; border: 1px solid #ffffff2e; border-radius: 9px; background: #121622; box-shadow: 0 8px 18px #05070ecc; }
+      .mobile-sort label { flex: 0 0 auto; color: #a9a7b5; font: 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .14em; text-transform: uppercase; }
+      .mobile-sort select { flex: 1 1 auto; min-width: 0; max-width: 235px; min-height: 44px; padding: 0 10px; border: 1px solid #ffffff2b; border-radius: 7px; background: #ffffff0a; color: #f2e8d8; font: inherit; font-size: 16px; }
+      .mobile-list { display: block; list-style: none; margin: 0 0 60px; padding: 0; border: 1px solid #ffffff22; border-radius: 10px; background: #121622; overflow: hidden; }
+      .mobile-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "head thumb" "stats stats" "foot foot"; gap: 11px 14px; align-items: start; padding: 15px; border-bottom: 1px solid #ffffff1a; }
+      .mobile-card:last-child { border-bottom: 0; }
+      .mobile-card-top { grid-area: head; display: flex; align-items: baseline; gap: 10px; min-width: 0; }
+      .mobile-card .rank { color: #dfb783; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .mobile-card .model-cell { min-width: 0; color: #e0dce5; font-size: 15px; font-weight: 650; line-height: 1.35; overflow-wrap: anywhere; }
+      .mobile-thumb { grid-area: thumb; width: 76px; aspect-ratio: 16 / 10; padding: 0; overflow: hidden; border: 1px solid #ffffff30; border-radius: 5px; background: #080b15; cursor: zoom-in; }
+      .mobile-thumb img { display: block; width: 100%; height: 100%; object-fit: contain; object-position: top center; }
+      .mobile-stats { grid-area: stats; display: flex; flex-wrap: wrap; gap: 8px 14px; margin: 0; }
+      .mobile-stats dt { color: #8990a0; font: 10px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; letter-spacing: .12em; text-transform: uppercase; }
+      .mobile-stats dd { margin: 3px 0 0; color: #f2e8d8; font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+      .mobile-stats .cost dd { color: #edc28e; }
+      .mobile-foot { grid-area: foot; display: flex; align-items: center; justify-content: flex-end; }
+      #fullImage { touch-action: pan-y; }
+      .lightbox-bar { flex-wrap: wrap; gap: 10px; padding: 12px 14px; }
+      .lightbox-title { flex: 1 1 100%; font-size: 14px; }
+      .lightbox-actions { flex: 1 1 auto; justify-content: space-between; }
+      .lightbox-actions button, .lightbox-actions a { flex: 1 1 0; }
+      .card h3 { font-size: 22px; }
+      .footer { flex-direction: column; }
+    }
+    @media (pointer: coarse) {
+      .brand { margin: -7px 0; padding: 7px 0; }
+      .view-switch button { min-height: 44px; }
+      .game-table th button { min-height: 36px; }
+      .rubric summary, .visual-review summary { padding: 7px 0; }
+      .launch, .table-launch { display: inline-flex; align-items: center; min-height: 44px; }
+      .zoom-label { opacity: 1; transform: none; }
+      .lightbox-actions button, .lightbox-actions a { width: 44px; min-width: 44px; height: 44px; }
+    }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0s !important; } }
   </style>
 </head>
@@ -134,7 +179,20 @@
           <p>Based on eleven desktop gameplay screenshots, reviewed on 25 October 2026. Original captures are 1440 × 900; newer captures use the available desktop viewport, with full-page captures for Sol, reworked Astra, and GLM 5.3. These subjective ratings are not a controlled viewport benchmark. Ratings describe the captured view, including visible clipping; animation, other screen sizes, gameplay quality, model cost, and token usage are not assessed. Expand a card’s breakdown for the reasoning.</p>
         </details>
         <div id="tableViewPanel">
-          <p class="table-note" id="rankNote">Rank uses visual score − 6 × log₂(1 + price in USD). Games without a reported price are unranked. Select a heading to sort.</p>
+          <p class="table-note" id="rankNote">Rank uses visual score − 6 × log₂(1 + price in USD). Games without a reported price are unranked. <span class="sort-hint-wide">Select a heading to sort.</span><span class="sort-hint-narrow">Choose an option in the sort menu to reorder.</span></p>
+          <div class="mobile-sort">
+            <label for="mobileSort">Sort</label>
+            <select id="mobileSort">
+              <option value="rank:ascending">Best value (rank)</option>
+              <option value="rank:descending">Worst value (rank)</option>
+              <option value="price:ascending">Price · low to high</option>
+              <option value="price:descending">Price · high to low</option>
+              <option value="tokens:ascending">Tokens · low to high</option>
+              <option value="tokens:descending">Tokens · high to low</option>
+              <option value="visuals:descending">Visuals · high to low</option>
+              <option value="visuals:ascending">Visuals · low to high</option>
+            </select>
+          </div>
           <div class="table-wrap" role="region" aria-label="Game comparison table" tabindex="0">
             <table class="game-table" aria-describedby="rankNote">
               <thead><tr>
@@ -149,6 +207,7 @@
               <tbody id="gameTableBody"></tbody>
             </table>
           </div>
+          <ul class="mobile-list" id="mobileList" aria-label="Game comparison list"></ul>
         </div>
         <div class="grid" id="gallery" hidden>
           <article class="card" data-name="GPT-6 Astra" data-image="gallery-assets/astra-reworked.png" data-link="Astra/index.html">
@@ -295,6 +354,9 @@
     let sortKey = 'rank';
     let sortDirection = 'ascending';
     const tableBody = document.querySelector('#gameTableBody');
+    const mobileList = document.querySelector('#mobileList');
+    const mobileSort = document.querySelector('#mobileSort');
+    const launchIcon = '<svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 13 13 3M5 3h8v8" stroke="currentColor" stroke-width="1.5"/></svg>';
     function renderTable() {
       const rows = [...gameRows].sort((a, b) => {
         const aValue = a[sortKey];
@@ -304,6 +366,7 @@
         return (aValue - bValue) * (sortDirection === 'ascending' ? 1 : -1) || a.index - b.index;
       });
       tableBody.replaceChildren();
+      mobileList.replaceChildren();
       rows.forEach(row => {
         const tr = document.createElement('tr');
         const rank = tr.insertCell();
@@ -339,9 +402,56 @@
         launch.setAttribute('aria-label', `Launch ${row.name} game`);
         gameCell.append(launch);
         tableBody.append(tr);
+
+        const item = document.createElement('li');
+        item.className = 'mobile-card';
+        const head = document.createElement('div');
+        head.className = 'mobile-card-top';
+        const mobileRank = document.createElement('span');
+        mobileRank.className = 'rank';
+        mobileRank.textContent = row.rank ?? '—';
+        const mobileModel = document.createElement('span');
+        mobileModel.className = 'model-cell';
+        mobileModel.textContent = row.model;
+        head.append(mobileRank, mobileModel);
+        const thumb = document.createElement('button');
+        thumb.type = 'button';
+        thumb.className = 'mobile-thumb';
+        thumb.setAttribute('aria-label', `Expand ${row.name} game screenshot`);
+        const thumbImage = document.createElement('img');
+        thumbImage.src = row.image;
+        thumbImage.alt = '';
+        thumbImage.loading = 'lazy';
+        thumb.append(thumbImage);
+        thumb.addEventListener('click', () => show(row.index));
+        const stats = document.createElement('dl');
+        stats.className = 'mobile-stats';
+        for (const [label, value, extraClass] of [['Price', row.priceText, 'cost'], ['Tokens', row.tokensText, ''], ['Visuals', `${row.visuals} / 100`, '']]) {
+          const group = document.createElement('div');
+          if (extraClass) group.className = extraClass;
+          const term = document.createElement('dt');
+          term.textContent = label;
+          const detail = document.createElement('dd');
+          detail.textContent = value || '—';
+          group.append(term, detail);
+          stats.append(group);
+        }
+        const foot = document.createElement('div');
+        foot.className = 'mobile-foot';
+        const mobileLaunch = document.createElement('a');
+        mobileLaunch.className = 'launch';
+        mobileLaunch.href = row.link;
+        mobileLaunch.target = '_blank';
+        mobileLaunch.rel = 'noopener';
+        mobileLaunch.setAttribute('aria-label', `Launch ${row.name} game`);
+        mobileLaunch.innerHTML = `Launch game ${launchIcon}`;
+        foot.append(mobileLaunch);
+        item.append(head, thumb, stats, foot);
+        mobileList.append(item);
       });
       document.querySelectorAll('.game-table th[aria-sort]').forEach(th => th.removeAttribute('aria-sort'));
       document.querySelector(`[data-sort="${sortKey}"]`).closest('th').setAttribute('aria-sort', sortDirection);
+      mobileSort.value = `${sortKey}:${sortDirection}`;
     }
     document.querySelectorAll('.game-table [data-sort]').forEach(button => button.addEventListener('click', () => {
       const key = button.dataset.sort;
@@ -349,6 +459,12 @@
       sortKey = key;
       renderTable();
     }));
+    mobileSort.addEventListener('change', () => {
+      const [key, direction] = mobileSort.value.split(':');
+      sortKey = key;
+      sortDirection = direction;
+      renderTable();
+    });
     const gallery = document.querySelector('#gallery');
     const tablePanel = document.querySelector('#tableViewPanel');
     const gridView = document.querySelector('#gridView');
@@ -361,9 +477,14 @@
       tableView.setAttribute('aria-pressed', String(isTable));
       if (isTable && !tableBody.children.length) renderTable();
     }
-    gridView.addEventListener('click', () => setView('cards'));
-    tableView.addEventListener('click', () => setView('table'));
-    setView('table');
+    const narrowQuery = window.matchMedia('(max-width: 650px)');
+    let viewWasChosen = false;
+    gridView.addEventListener('click', () => { viewWasChosen = true; setView('cards'); });
+    tableView.addEventListener('click', () => { viewWasChosen = true; setView('table'); });
+    setView(narrowQuery.matches ? 'cards' : 'table');
+    const onNarrowChange = event => { if (!viewWasChosen) setView(event.matches ? 'cards' : 'table'); };
+    if (narrowQuery.addEventListener) narrowQuery.addEventListener('change', onNarrowChange);
+    else narrowQuery.addListener(onNarrowChange);
     const lightbox = document.querySelector('#lightbox');
     const fullImage = document.querySelector('#fullImage');
     let current = 0;
@@ -379,6 +500,15 @@
     cards.forEach((card, index) => card.querySelector('.preview').addEventListener('click', () => show(index)));
     document.querySelector('#previous').addEventListener('click', () => show(current - 1));
     document.querySelector('#next').addEventListener('click', () => show(current + 1));
+    let touchStartX = null;
+    fullImage.addEventListener('touchstart', event => { touchStartX = event.changedTouches[0].clientX; }, { passive: true });
+    fullImage.addEventListener('touchend', event => {
+      if (touchStartX === null) return;
+      const delta = event.changedTouches[0].clientX - touchStartX;
+      touchStartX = null;
+      if (Math.abs(delta) < 45) return;
+      show(current + (delta < 0 ? 1 : -1));
+    }, { passive: true });
     document.querySelector('#close').addEventListener('click', () => lightbox.close());
     lightbox.addEventListener('click', event => { if (event.target === lightbox) lightbox.close(); });
     document.addEventListener('keydown', event => {
